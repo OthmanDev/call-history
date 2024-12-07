@@ -130,31 +130,40 @@
           </div>
         </div>
         <div v-if="moreFilters" class="border-b border-border-100 p-4">
-          <div class="flex items-center gap-2">
+          <div class="flex items-center flex-wrap gap-2">
             <div
-              class="relative flex items-center overflow-hidden border border-border-100 rounded-md max-w-[200px]"
+              class="relative flex items-center border border-border-100 rounded-md max-w-[200px]"
             >
               <select
-                class="w-full h-11 outline-none px-4 appearance-none cursor-pointer text-heading-100"
+                v-model="selectedDisposition"
+                class="w-full h-11 outline-none px-4 appearance-none cursor-pointer text-heading-100 rounded-md"
               >
-                <option selected disabled value="-1">Disposition</option>
+                <option selected disabled value="">Disposition</option>
                 <option v-for="(filter, key) in dispositionFilter" :key="key" :value="filter">
                   {{ filter }}
                 </option>
               </select>
               <span
-                class="absolute top-0 right-0 bottom-0 w-[40px] bg-white-100 pointer-events-none flex items-center justify-center"
+                class="absolute top-0 right-0 bottom-0 w-[40px] bg-white-100 pointer-events-none flex items-center justify-center rounded-tr-md rounded-br-md"
               >
                 <ChevronDown :size="18" :stroke-width="1.75" />
               </span>
+              <span
+                v-if="selectedDisposition !== ''"
+                @click="selectedDisposition = ''"
+                class="absolute -top-1 -right-1 w-[14px] h-[14px] bg-danger-100 text-white-100 flex items-center justify-center cursor-pointer rounded-full"
+              >
+                <X :size="10" :stroke-width="2" />
+              </span>
             </div>
             <div
-              class="relative flex items-center overflow-hidden border border-border-100 rounded-md max-w-[200px]"
+              class="relative flex items-center border border-border-100 rounded-md max-w-[200px]"
             >
               <select
-                class="w-full h-11 outline-none px-4 appearance-none cursor-pointer text-heading-100"
+                v-model="selectedDisconnectionReason"
+                class="w-full h-11 outline-none px-4 appearance-none cursor-pointer text-heading-100 rounded-md"
               >
-                <option selected disabled value="-1">Disconnection Reason</option>
+                <option selected disabled value="">Disconnection Reason</option>
                 <option
                   v-for="(filter, key) in disconnectionReasonFilter"
                   :key="key"
@@ -164,106 +173,167 @@
                 </option>
               </select>
               <span
-                class="absolute top-0 right-0 bottom-0 w-[40px] bg-white-100 pointer-events-none flex items-center justify-center"
+                class="absolute top-0 right-0 bottom-0 w-[40px] bg-white-100 pointer-events-none flex items-center justify-center rounded-tr-md rounded-br-md"
               >
                 <ChevronDown :size="18" :stroke-width="1.75" />
               </span>
+              <span
+                v-if="selectedDisconnectionReason !== ''"
+                @click="selectedDisconnectionReason = ''"
+                class="absolute -top-1 -right-1 w-[14px] h-[14px] bg-danger-100 text-white-100 flex items-center justify-center cursor-pointer rounded-full"
+              >
+                <X :size="10" :stroke-width="2" />
+              </span>
             </div>
-            <div class="h-11 border border-border-100 rounded-md px-4 flex items-center">
+            <div class="h-11 border border-border-100 rounded-md px-4 flex items-center relative">
               <div class="switcher">
                 <input
                   id="has-debt"
                   type="checkbox"
                   :checked="hasDebtFilter"
-                  :value="hasDebtFilter"
+                  v-model="hasDebtFilter"
                 />
                 <label for="has-debt">Has Debt</label>
               </div>
+              <span
+                v-if="hasDebtFilter"
+                @click="hasDebtFilter = false"
+                class="absolute -top-1 -right-1 w-[14px] h-[14px] bg-danger-100 text-white-100 flex items-center justify-center cursor-pointer rounded-full"
+              >
+                <X :size="10" :stroke-width="2" />
+              </span>
             </div>
             <div
-              class="relative flex items-center overflow-hidden border border-border-100 rounded-md min-w-[110px]"
+              class="relative flex items-center border border-border-100 rounded-md min-w-[110px]"
             >
               <select
-                class="w-full h-11 outline-none px-4 appearance-none cursor-pointer text-heading-100"
+                v-model="selectedDialed"
+                class="w-full h-11 outline-none px-4 appearance-none cursor-pointer text-heading-100 rounded-md"
               >
-                <option selected disabled value="-1">Dialed</option>
+                <option selected disabled value="">Dialed</option>
                 <option v-for="(filter, key) in dialedFilter" :key="key" :value="filter">
                   {{ filter }}
                 </option>
               </select>
               <span
-                class="absolute top-0 right-0 bottom-0 w-[40px] bg-white-100 pointer-events-none flex items-center justify-center"
+                class="absolute top-0 right-0 bottom-0 w-[40px] bg-white-100 pointer-events-none flex items-center justify-center rounded-tr-md rounded-br-md"
               >
                 <ChevronDown :size="18" :stroke-width="1.75" />
               </span>
+              <span
+                v-if="selectedDialed !== ''"
+                @click="selectedDialed = ''"
+                class="absolute -top-1 -right-1 w-[14px] h-[14px] bg-danger-100 text-white-100 flex items-center justify-center cursor-pointer rounded-full"
+              >
+                <X :size="10" :stroke-width="2" />
+              </span>
             </div>
-            <div class="h-11 border border-border-100 rounded-md px-4 flex items-center">
+            <div class="h-11 border border-border-100 rounded-md px-4 flex items-center relative">
               <div class="switcher">
                 <input
                   id="dial-again"
                   type="checkbox"
                   :checked="dialAgainFilter"
-                  :value="dialAgainFilter"
+                  v-model="dialAgainFilter"
                 />
                 <label for="dial-again">Dial Again</label>
               </div>
+              <span
+                v-if="dialAgainFilter"
+                @click="dialAgainFilter = false"
+                class="absolute -top-1 -right-1 w-[14px] h-[14px] bg-danger-100 text-white-100 flex items-center justify-center cursor-pointer rounded-full"
+              >
+                <X :size="10" :stroke-width="2" />
+              </span>
             </div>
             <div
-              class="relative flex items-center overflow-hidden border border-border-100 rounded-md max-w-[200px]"
+              class="relative flex items-center border border-border-100 rounded-md max-w-[200px]"
             >
               <select
-                class="w-full h-11 outline-none px-4 appearance-none cursor-pointer text-heading-100"
+                v-model="selectedStage"
+                class="w-full h-11 outline-none px-4 appearance-none cursor-pointer text-heading-100 rounded-md"
               >
-                <option selected disabled value="-1">Stage</option>
+                <option selected disabled value="">Stage</option>
                 <option v-for="(filter, key) in stages" :key="key" :value="filter">
                   {{ filter }}
                 </option>
               </select>
               <span
-                class="absolute top-0 right-0 bottom-0 w-[40px] bg-white-100 pointer-events-none flex items-center justify-center"
+                class="absolute top-0 right-0 bottom-0 w-[40px] bg-white-100 pointer-events-none flex items-center justify-center rounded-tr-md rounded-br-md"
               >
                 <ChevronDown :size="18" :stroke-width="1.75" />
               </span>
+              <span
+                v-if="selectedStage !== ''"
+                @click="selectedStage = ''"
+                class="absolute -top-1 -right-1 w-[14px] h-[14px] bg-danger-100 text-white-100 flex items-center justify-center cursor-pointer rounded-full"
+              >
+                <X :size="10" :stroke-width="2" />
+              </span>
             </div>
             <div
-              class="relative flex items-center overflow-hidden border border-border-100 rounded-md min-w-[110px] max-w-[200px]"
+              class="relative flex items-center border border-border-100 rounded-md min-w-[110px] max-w-[200px]"
             >
               <select
-                class="w-full h-11 outline-none px-4 appearance-none cursor-pointer text-heading-100"
+                v-model="selectedState"
+                class="w-full h-11 outline-none px-4 appearance-none cursor-pointer text-heading-100 rounded-md"
               >
-                <option selected disabled value="-1">State</option>
+                <option selected disabled value="">State</option>
                 <option v-for="(filter, key) in satesFilter" :key="key" :value="filter">
                   {{ filter }}
                 </option>
               </select>
               <span
-                class="absolute top-0 right-0 bottom-0 w-[40px] bg-white-100 pointer-events-none flex items-center justify-center"
+                class="absolute top-0 right-0 bottom-0 w-[40px] bg-white-100 pointer-events-none flex items-center justify-center rounded-tr-md rounded-br-md"
               >
                 <ChevronDown :size="18" :stroke-width="1.75" />
               </span>
+              <span
+                v-if="selectedState !== ''"
+                @click="selectedState = ''"
+                class="absolute -top-1 -right-1 w-[14px] h-[14px] bg-danger-100 text-white-100 flex items-center justify-center cursor-pointer rounded-full"
+              >
+                <X :size="10" :stroke-width="2" />
+              </span>
             </div>
             <div
-              class="relative flex items-center overflow-hidden border border-border-100 rounded-md max-w-[200px]"
+              class="relative flex items-center border border-border-100 rounded-md max-w-[200px]"
             >
               <input
-                type="text"
-                class="w-full h-11 outline-none px-4 text-heading-100"
+                v-model="debtAmount"
+                type="number"
+                class="w-full h-11 outline-none px-4 text-heading-100 rounded-md"
                 placeholder="Debt Amount"
               />
+              <span
+                v-if="debtAmount !== ''"
+                @click="debtAmount = ''"
+                class="absolute -top-1 -right-1 w-[14px] h-[14px] bg-danger-100 text-white-100 flex items-center justify-center cursor-pointer rounded-full"
+              >
+                <X :size="10" :stroke-width="2" />
+              </span>
             </div>
             <div
-              class="relative flex items-center overflow-hidden border border-border-100 rounded-md max-w-[200px]"
+              class="relative flex items-center border border-border-100 rounded-md max-w-[200px]"
             >
               <input
-                type="text"
-                class="w-full h-11 outline-none px-4 text-heading-100"
+                v-model="selectedPayment"
+                type="number"
+                class="w-full h-11 outline-none px-4 text-heading-100 rounded-md"
                 placeholder="Payment"
               />
+              <span
+                v-if="selectedPayment !== ''"
+                @click="selectedPayment = ''"
+                class="absolute -top-1 -right-1 w-[14px] h-[14px] bg-danger-100 text-white-100 flex items-center justify-center cursor-pointer rounded-full"
+              >
+                <X :size="10" :stroke-width="2" />
+              </span>
             </div>
           </div>
         </div>
         <div class="max-w-full overflow-x-auto without-scrollbar">
-          <table class="w-full">
+          <table v-if="filteredCustomers.length > 0" class="w-full">
             <thead>
               <tr class="bg-[#F8F7FA] border-b border-border-100">
                 <th
@@ -320,7 +390,7 @@
               </tr>
             </thead>
             <tbody class="divide-y divide-border-100">
-              <template v-for="(customer, index) in customers" :key="index">
+              <template v-for="(customer, index) in filteredCustomers" :key="index">
                 <tr>
                   <td class="p-3 text-left font-medium text-[15px]">
                     <button @click="toggleExpandedRow(index)" class="mt-1.5">
@@ -460,6 +530,7 @@
                   <td class="p-3 text-left font-medium text-[15px]">
                     <div class="flex items-center gap-2">
                       <span
+                        v-if="customer.call_history[0]?.transcript"
                         @click="showTranscriptPreviewModal(customer)"
                         class="cursor-pointer transition-colors duration-150 hover:text-info-100"
                         title="Show Transcript"
@@ -628,6 +699,61 @@
               </template>
             </tbody>
           </table>
+          <div
+            v-if="!isLoading && filteredCustomers.length === 0"
+            class="h-[300px] flex items-center justify-center flex-col text-center"
+          >
+            <div class="w-[180px] mb-3">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 647.63626 632.17383"
+                class="w-full"
+              >
+                <path
+                  d="M687.3279,276.08691H512.81813a15.01828,15.01828,0,0,0-15,15v387.85l-2,.61005-42.81006,13.11a8.00676,8.00676,0,0,1-9.98974-5.31L315.678,271.39691a8.00313,8.00313,0,0,1,5.31006-9.99l65.97022-20.2,191.25-58.54,65.96972-20.2a7.98927,7.98927,0,0,1,9.99024,5.3l32.5498,106.32Z"
+                  transform="translate(-276.18187 -133.91309)"
+                  fill="hsl(249.64deg 70.98% 37.84% / 10%)"
+                ></path>
+                <path
+                  d="M725.408,274.08691l-39.23-128.14a16.99368,16.99368,0,0,0-21.23-11.28l-92.75,28.39L380.95827,221.60693l-92.75,28.4a17.0152,17.0152,0,0,0-11.28028,21.23l134.08008,437.93a17.02661,17.02661,0,0,0,16.26026,12.03,16.78926,16.78926,0,0,0,4.96972-.75l63.58008-19.46,2-.62v-2.09l-2,.61-64.16992,19.65a15.01489,15.01489,0,0,1-18.73-9.95l-134.06983-437.94a14.97935,14.97935,0,0,1,9.94971-18.73l92.75-28.4,191.24024-58.54,92.75-28.4a15.15551,15.15551,0,0,1,4.40966-.66,15.01461,15.01461,0,0,1,14.32032,10.61l39.0498,127.56.62012,2h2.08008Z"
+                  transform="translate(-276.18187 -133.91309)"
+                  fill="hsl(249.64deg 70.98% 37.84% / 10%)"
+                ></path>
+                <path
+                  d="M398.86279,261.73389a9.0157,9.0157,0,0,1-8.61133-6.3667l-12.88037-42.07178a8.99884,8.99884,0,0,1,5.9712-11.24023l175.939-53.86377a9.00867,9.00867,0,0,1,11.24072,5.9707l12.88037,42.07227a9.01029,9.01029,0,0,1-5.9707,11.24072L401.49219,261.33887A8.976,8.976,0,0,1,398.86279,261.73389Z"
+                  transform="translate(-276.18187 -133.91309)"
+                  fill="#321CA4"
+                ></path>
+                <circle cx="190.15351" cy="24.95465" r="20" fill="#321CA4"></circle>
+                <circle cx="190.15351" cy="24.95465" r="12.66462" fill="#FFF"></circle>
+                <path
+                  d="M878.81836,716.08691h-338a8.50981,8.50981,0,0,1-8.5-8.5v-405a8.50951,8.50951,0,0,1,8.5-8.5h338a8.50982,8.50982,0,0,1,8.5,8.5v405A8.51013,8.51013,0,0,1,878.81836,716.08691Z"
+                  transform="translate(-276.18187 -133.91309)"
+                  fill="hsl(249.64deg 70.98% 37.84% / 10%)"
+                ></path>
+                <path
+                  d="M723.31813,274.08691h-210.5a17.02411,17.02411,0,0,0-17,17v407.8l2-.61v-407.19a15.01828,15.01828,0,0,1,15-15H723.93825Zm183.5,0h-394a17.02411,17.02411,0,0,0-17,17v458a17.0241,17.0241,0,0,0,17,17h394a17.0241,17.0241,0,0,0,17-17v-458A17.02411,17.02411,0,0,0,906.81813,274.08691Zm15,475a15.01828,15.01828,0,0,1-15,15h-394a15.01828,15.01828,0,0,1-15-15v-458a15.01828,15.01828,0,0,1,15-15h394a15.01828,15.01828,0,0,1,15,15Z"
+                  transform="translate(-276.18187 -133.91309)"
+                  fill="hsl(249.64deg 70.98% 37.84% / 10%)"
+                ></path>
+                <path
+                  d="M801.81836,318.08691h-184a9.01015,9.01015,0,0,1-9-9v-44a9.01016,9.01016,0,0,1,9-9h184a9.01016,9.01016,0,0,1,9,9v44A9.01015,9.01015,0,0,1,801.81836,318.08691Z"
+                  transform="translate(-276.18187 -133.91309)"
+                  fill="#321CA4"
+                ></path>
+                <circle cx="433.63626" cy="105.17383" r="20" fill="#321CA4"></circle>
+                <circle cx="433.63626" cy="105.17383" r="12.18187" fill="#FFF"></circle>
+              </svg>
+            </div>
+            <span class="text-heading-100 text-[17px] block mb-2 capitalize"
+              >No results match your current filter criteria.</span
+            >
+            <span
+              @click="clearFilters"
+              class="text-heading-100 text-[17px] capitalize font-medium hover:text-primary-100 cursor-pointer"
+              >Clear filters</span
+            >
+          </div>
         </div>
         <div
           class="border-t-4 rounded-bl-xl rounded-br-xl"
@@ -885,6 +1011,8 @@ export default {
       hasDebtFilter: false,
       dialedFilter: [0, 1, 2, 3, 4, 5],
       dialAgainFilter: false,
+      moreFilters: false,
+      satesFilter: ['FL', 'MD', 'TX', 'NY'],
       currentPediod: {
         label: 'Today',
         value: 'today',
@@ -916,8 +1044,13 @@ export default {
           value: 'all_time',
         },
       ],
-      moreFilters: false,
-      satesFilter: ['FL', 'MD', 'TX', 'NY'],
+      selectedDisposition: '',
+      selectedDisconnectionReason: '',
+      selectedState: '',
+      selectedStage: '',
+      selectedDialed: '',
+      debtAmount: '',
+      selectedPayment: '',
     }
   },
   mounted() {
@@ -936,7 +1069,7 @@ export default {
         }
         let queries = {
           skip: this.currentPage,
-          limit: 20,
+          limit: 30,
         }
         queries = new URLSearchParams(queries).toString()
         const { data } = await ApiRequest().get(`/merged-data?${queries}`)
@@ -1078,7 +1211,78 @@ export default {
       link.download = 'data.csv'
       link.click()
     },
+    clearFilters() {
+      this.selectedDisposition = ''
+      this.selectedDisconnectionReason = ''
+      this.selectedState = ''
+      this.selectedStage = ''
+      this.selectedDialed = ''
+      this.debtAmount = ''
+      this.selectedPayment = ''
+      this.hasDebtFilter = false
+      this.dialAgainFilter = false
+      this.moreFilters = false
+    },
   },
-  computed: {},
+  computed: {
+    filteredCustomers() {
+      return this.customers.filter((customer) => {
+        // Disposition filter
+        const dispositionMatch =
+          !this.selectedDisposition ||
+          customer.call_history[0].call_analysis.custom_analysis_data.disposition ===
+            this.selectedDisposition
+
+        // Disconnection Reason filter
+        const disconnectionReasonMatch =
+          !this.selectedDisconnectionReason ||
+          customer.call_history[0].disconnection_reason ===
+            this.selectedDisconnectionReason.toLowerCase().replaceAll(' ', '_')
+
+        // States filter
+        const stateMatch =
+          !this.selectedState || customer.customer_data.STATE === this.selectedState
+
+        // Has Debt filter
+        const hasDebtMatch =
+          !this.hasDebtFilter ||
+          customer.call_history[0].call_analysis.custom_analysis_data.has_debt
+
+        // Dial Again filter
+        const dialAgainMatch = !this.dialAgainFilter || customer.call_history[0].dial_again
+
+        // Stage filter
+        const stageMatch = !this.selectedStage || customer.stage === this.selectedStage
+
+        // Dialed filter
+        const dialedMatch =
+          !this.selectedDialed || customer.call_history[0].redialed_count === this.selectedDialed
+
+        // Debt Amount filter
+        const debtAmountMatch =
+          !this.debtAmount ||
+          customer.call_history[0].call_analysis.custom_analysis_data.total_debt === this.debtAmount
+
+        // Payemnt filter
+        const paymentMatch =
+          !this.selectedPayment ||
+          customer.call_history[0].call_analysis.custom_analysis_data.weekly_payments ===
+            this.selectedPayment
+
+        // Combine all filters
+        return (
+          dispositionMatch &&
+          disconnectionReasonMatch &&
+          stateMatch &&
+          hasDebtMatch &&
+          dialAgainMatch &&
+          stageMatch &&
+          dialedMatch &&
+          debtAmountMatch &&
+          paymentMatch
+        )
+      })
+    },
+  },
 }
 </script>
