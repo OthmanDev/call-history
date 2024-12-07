@@ -5,3 +5,42 @@
 body {
   @apply font-main leading-[1.25] antialiased text-[#484848];
 }
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.spin {
+  animation: spin 2s linear infinite;
+}
+
+.switcher {
+  @apply flex;
+}
+.switcher label {
+  @apply cursor-pointer relative inline-flex items-center gap-2;
+}
+.switcher input {
+  @apply hidden;
+}
+.switcher label:before {
+  content: '';
+  @apply w-11 h-6 bg-border-100 block rounded-full;
+}
+.switcher label:after {
+  content: '';
+  top: 2px;
+  left: 2px;
+  @apply w-5 h-5 bg-white-100 rounded-full transition-all absolute;
+}
+.switcher input:checked + label:before {
+  @apply bg-primary-100;
+}
+.switcher input:checked + label:after {
+  left: calc(44px - 22px);
+}

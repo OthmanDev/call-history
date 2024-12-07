@@ -3,6 +3,7 @@ import axios from 'axios'
 function ApiRequest(fullURL = false, appNameHeader = true) {
   if (appNameHeader) {
     axios.defaults.headers.common['x-app-name'] = import.meta.env.VITE_APP_NAME
+    axios.defaults.headers.common['ngrok-skip-browser-warning'] = '*'
   }
   if (!fullURL) {
     axios.defaults.baseURL = import.meta.env.VITE_API_BASE_URL
@@ -13,7 +14,7 @@ function ApiRequest(fullURL = false, appNameHeader = true) {
       return response
     },
     async (err) => {
-      if (err.response.status !== 401) {
+      if (err.response?.status !== 401) {
         return new Promise((resolve, reject) => {
           reject(err)
         })
