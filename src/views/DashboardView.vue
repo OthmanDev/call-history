@@ -441,6 +441,7 @@
                       class="relative flex items-center overflow-hidden border border-border-100 rounded-md"
                     >
                       <select
+                        :value="customer.customer_data.stage"
                         @change="updateStage($event, customer)"
                         class="w-full h-10 outline-none px-2 appearance-none cursor-pointer text-heading-100"
                       >
@@ -483,13 +484,21 @@
                           <h3 class="font-semibold text-heading-100">Business Details</h3>
                         </div>
                         <div class="p-4 grid gap-2">
-                          <p v-if="customer.customer_data.INDUSTRY">
-                            <span class="font-medium text-heading-100">Industry</span>:
-                            {{ customer.customer_data.INDUSTRY }}
+                          <p v-if="customer.customer_data.lead_source">
+                            <span class="font-medium text-heading-100">Lead Source</span>:
+                            {{ customer.customer_data.lead_source }}
                           </p>
-                          <p v-if="customer.customer_data.ADDRESS">
-                            <span class="font-medium text-heading-100">Address</span>:
-                            {{ customer.customer_data.ADDRESS }}
+                          <p v-if="customer.customer_data.added_data">
+                            <span class="font-medium text-heading-100">Date Contact Added</span>:
+                            {{ formatDate(customer.customer_data.added_data) }}
+                          </p>
+                          <p v-if="customer.customer_data.OWNER">
+                            <span class="font-medium text-heading-100">Contact Name</span>:
+                            {{ customer.customer_data.OWNER }}
+                          </p>
+                          <p v-if="customer.customer_data.BUSINESS">
+                            <span class="font-medium text-heading-100">Business Name</span>:
+                            {{ customer.customer_data.BUSINESS }}
                           </p>
                           <p v-if="customer.customer_data.CITY">
                             <span class="font-medium text-heading-100">City</span>:
@@ -498,14 +507,6 @@
                           <p v-if="customer.customer_data.STATE">
                             <span class="font-medium text-heading-100">State</span>:
                             {{ customer.customer_data.STATE }}
-                          </p>
-                          <p v-if="customer.customer_data.ZIP">
-                            <span class="font-medium text-heading-100">ZIP</span>:
-                            {{ customer.customer_data.ZIP }}
-                          </p>
-                          <p v-if="customer.customer_data['MONTHLY REVENUE']">
-                            <span class="font-medium text-heading-100">Monthly Revenue</span>:
-                            {{ customer.customer_data['MONTHLY REVENUE'].toLocaleString() }}
                           </p>
                           <p v-if="customer.customer_data.EMAIL">
                             <span class="font-medium text-heading-100">Email</span>:
