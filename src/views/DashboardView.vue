@@ -270,7 +270,7 @@
                   class="p-3 text-left text-heading-100 text-[15px] capitalize font-semibold"
                 ></th>
                 <th class="p-3 text-left text-heading-100 text-[15px] capitalize font-semibold">
-                  Date/Time
+                  Time Called
                 </th>
                 <th class="p-3 text-left text-heading-100 text-[15px] capitalize font-semibold">
                   Name
@@ -1009,7 +1009,7 @@ export default {
     },
     exportCSV() {
       const headers = [
-        'Date/Time',
+        'Time Called',
         'Name',
         'Business',
         'Phone',
