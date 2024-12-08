@@ -81,7 +81,7 @@
             </div>
             <div>
               <h4 class="text-2xl font-bold text-heading-100 mb-1 uppercase">
-                {{ summary.totalCalls }}
+                {{ totalCalls }}
               </h4>
               <span class="text-[17px] capitalize">Total Calls</span>
             </div>
@@ -96,7 +96,7 @@
             </div>
             <div>
               <h4 class="text-2xl font-bold text-heading-100 mb-1 uppercase">
-                {{ summary.connectedCalls }}
+                {{ connectedCalls }}
               </h4>
               <span class="text-[17px] capitalize">Connected Calls</span>
             </div>
@@ -799,7 +799,6 @@
               class="w-full border border-border-100 rounded-md px-4 py-3 outline-none"
               placeholder="Notes..."
               :value="currentCallToHanlde.customer_data.NOTES"
-              @input="updateNotes($event, currentCallToHanlde)"
               rows="2"
             ></textarea>
           </div>
@@ -813,6 +812,7 @@
             Close
           </button>
           <button
+            @click="updateNotes($event, currentCallToHanlde)"
             type="button"
             class="flex items-center h-10 px-4 bg-primary-100 text-white-100 rounded-md leading-none transition-all duration-150 hover:brightness-125 font-medium"
           >
@@ -889,73 +889,8 @@ export default {
     LoaderCircle,
   },
   data() {
-    const today = new Date().toISOString().split('T')[0]
     return {
-      dateRange: [today, today],
       expandedRowId: null,
-      callData: [
-        {
-          id: 1,
-          date: today,
-          businessName: 'ABC Corp',
-          phone: '+1234567890',
-          duration: '5:23',
-          status: 'Connected',
-          callCount: 3,
-          fundedAmount: 50000,
-          lender: 'XYZ Capital',
-          stage: '1. Closer qualified, follow up',
-          notes: 'Initial discussion about refinancing',
-          industry: 'Technology',
-          address: '123 Main St',
-          city: 'San Francisco',
-          state: 'CA',
-          zip: '94105',
-          monthlyRevenue: 100000,
-          email: 'contact@abccorp.com',
-          callId: 'CALL123',
-          disconnectionReason: 'Call completed normally',
-          userSentiment: 'Positive',
-          from: '+1234567890',
-          to: '+9876543210',
-          latency: 150,
-          positions_1: 'CEO',
-          positions_info_1: 'Primary decision maker',
-          frequency_1: 'Weekly',
-          positions_2: 'CFO',
-          positions_info_2: 'Financial approval',
-          frequency_2: 'Monthly',
-        },
-        {
-          id: 2,
-          date: today,
-          businessName: 'XYZ Industries',
-          phone: '+1987654320',
-          duration: '3:45',
-          status: 'Connected',
-          callCount: 2,
-          fundedAmount: 75000,
-          lender: 'ABC Financial',
-          stage: '2. Quote sent, awaiting agreements',
-          notes: 'Follow-up on proposal',
-          industry: 'Manufacturing',
-          address: '456 Industrial Ave',
-          city: 'Chicago',
-          state: 'IL',
-          zip: '60601',
-          monthlyRevenue: 200000,
-          email: 'info@xyzind.com',
-          callId: 'CALL124',
-          disconnectionReason: 'Call completed normally',
-          userSentiment: 'Neutral',
-          from: '+1987654320',
-          to: '+9876543211',
-          latency: 120,
-          positions_1: 'Owner',
-          positions_info_1: 'Final decision maker',
-          frequency_1: 'Bi-weekly',
-        },
-      ],
       stages: [
         'Closer qualified, follow up',
         'Quote sent, awaiting agreements',
@@ -964,14 +899,11 @@ export default {
         'Closed',
         'Paid',
       ],
-      summary: {
-        totalCalls: 145,
-        connectedCalls: 89,
-      },
       updateNoteModal: null,
       showTranscriptModal: null,
       currentCallToHanlde: {},
       customers: [],
+      allCustomers: [],
       currentPage: 0,
       isLoading: false,
       dispositionFilter: [
@@ -1054,6 +986,7 @@ export default {
     }
   },
   mounted() {
+    this.loadAllCustomers()
     this.loadCustomers(this.currentPage)
   },
   methods: {
@@ -1080,28 +1013,38 @@ export default {
         this.isLoading = false
       }
     },
-    updateStartDate(event) {
-      this.dateRange = [event.target.value, this.dateRange[1]]
-    },
-    updateEndDate(event) {
-      this.dateRange = [this.dateRange[0], event.target.value]
+    async loadAllCustomers() {
+      this.isLoading = true
+      try {
+        let queries = {
+          skip: 0,
+          limit: 500,
+        }
+        queries = new URLSearchParams(queries).toString()
+        const { data } = await ApiRequest().get(`/merged-data?${queries}`)
+        this.allCustomers = data.data
+        this.isLoading = false
+      } catch (e) {
+        console.log(e)
+        this.isLoading = false
+      }
     },
     toggleExpandedRow(id) {
       this.expandedRowId = this.expandedRowId === id ? null : id
     },
     updateStage(event, call) {
       // In a real app, you'd typically update this via an API
-      const index = this.callData.findIndex((c) => c.id === call.id)
-      if (index !== -1) {
-        this.callData[index].stage = event.target.value
-      }
+      // const index = this.callData.findIndex((c) => c.id === call.id)
+      // if (index !== -1) {
+      //   this.callData[index].stage = event.target.value
+      // }
     },
     updateNotes(event, call) {
       // In a real app, you'd typically update this via an API
-      const index = this.callData.findIndex((c) => c.id === call.id)
-      if (index !== -1) {
-        this.callData[index].notes = event.target.value
-      }
+      // const index = this.callData.findIndex((c) => c.id === call.id)
+      // if (index !== -1) {
+      //   this.callData[index].notes = event.target.value
+      // }
     },
     showUpdateNoteModal(customer) {
       this.currentCallToHanlde = customer
@@ -1282,6 +1225,14 @@ export default {
           paymentMatch
         )
       })
+    },
+    totalCalls() {
+      return this.allCustomers.filter((customer) => customer.call_history.length > 0).length
+    },
+    connectedCalls() {
+      return this.allCustomers.filter((customer) => {
+        return customer.call_history.every((call) => call.call_analysis?.call_successful)
+      }).length
     },
   },
 }
