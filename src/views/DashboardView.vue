@@ -194,7 +194,23 @@
                 <X :size="10" :stroke-width="2" />
               </span>
             </div>
+            <div class="relative flex items-center border border-border-100 rounded-md w-[200px]">
+              <input
+                v-model="selectedLeadSource"
+                type="text"
+                class="w-full h-11 outline-none px-4 text-heading-100 rounded-md"
+                placeholder="Lead Source"
+              />
+              <span
+                v-if="selectedLeadSource !== ''"
+                @click="selectedLeadSource = ''"
+                class="absolute -top-1 -right-1 w-[14px] h-[14px] bg-danger-100 text-white-100 flex items-center justify-center cursor-pointer rounded-full"
+              >
+                <X :size="10" :stroke-width="2" />
+              </span>
+            </div>
             <div
+              v-if="false"
               class="relative flex items-center border border-border-100 rounded-md min-w-[110px]"
             >
               <select
@@ -757,7 +773,7 @@
       </div>
     </div>
     <div
-      v-if="updateNoteModal && updateNoteModal.id === currentCallToHanlde.customer_data._id"
+      v-if="updateNoteModal && updateNoteModal.id === currentCustomerToHanlde.customer_data._id"
       class="bg-opacity-40 fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-heading-100"
     >
       <div class="max-w-2xl rounded-xl w-full mx-auto bg-white-100">
@@ -775,7 +791,7 @@
             <textarea
               class="w-full border border-border-100 rounded-md px-4 py-3 outline-none"
               placeholder="Notes..."
-              :value="currentCallToHanlde.customer_data.NOTES"
+              v-model="currentCustomerToHanlde.customer_data.NOTES"
               rows="2"
             ></textarea>
           </div>
@@ -789,7 +805,7 @@
             Close
           </button>
           <button
-            @click="updateNotes($event, currentCallToHanlde)"
+            @click="updateNotes(currentCustomerToHanlde)"
             type="button"
             class="flex items-center h-10 px-4 bg-primary-100 text-white-100 rounded-md leading-none transition-all duration-150 hover:brightness-125 font-medium"
           >
@@ -799,7 +815,9 @@
       </div>
     </div>
     <div
-      v-if="showTranscriptModal && showTranscriptModal.id === currentCallToHanlde.customer_data._id"
+      v-if="
+        showTranscriptModal && showTranscriptModal.id === currentCustomerToHanlde.customer_data._id
+      "
       class="bg-opacity-40 fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-heading-100"
     >
       <div class="max-w-2xl rounded-xl w-full mx-auto bg-white-100">
@@ -816,7 +834,7 @@
           <div class="p-4 bg-[#F8F7FA] border border-border-100 rounded-md">
             <div
               class="text-heading-100 grid gap-1"
-              v-html="formattedTranscript(currentCallToHanlde.call_history[0].transcript)"
+              v-html="formattedTranscript(currentCustomerToHanlde.call_history[0].transcript)"
             ></div>
           </div>
         </div>
@@ -878,7 +896,7 @@ export default {
       ],
       updateNoteModal: null,
       showTranscriptModal: null,
-      currentCallToHanlde: {},
+      currentCustomerToHanlde: {},
       customers: [],
       allCustomers: [],
       currentPage: 0,
@@ -954,6 +972,7 @@ export default {
       selectedPayment: '',
       selectedDebt: '',
       selectedDialAgain: '',
+      selectedLeadSource: '',
     }
   },
   mounted() {
@@ -1005,28 +1024,20 @@ export default {
     toggleExpandedRow(id) {
       this.expandedRowId = this.expandedRowId === id ? null : id
     },
-    updateStage(event, call) {
-      // In a real app, you'd typically update this via an API
-      // const index = this.callData.findIndex((c) => c.id === call.id)
-      // if (index !== -1) {
-      //   this.callData[index].stage = event.target.value
-      // }
+    updateStage(event, customer) {
+      console.log(customer.customer_data._id, event.target.value)
     },
-    updateNotes(event, call) {
-      // In a real app, you'd typically update this via an API
-      // const index = this.callData.findIndex((c) => c.id === call.id)
-      // if (index !== -1) {
-      //   this.callData[index].notes = event.target.value
-      // }
+    updateNotes(customer) {
+      console.log(customer.customer_data._id, customer.customer_data.NOTES)
     },
     showUpdateNoteModal(customer) {
-      this.currentCallToHanlde = customer
+      this.currentCustomerToHanlde = customer
       this.updateNoteModal = {
         id: customer.customer_data._id,
       }
     },
     showTranscriptPreviewModal(customer) {
-      this.currentCallToHanlde = customer
+      this.currentCustomerToHanlde = customer
       this.showTranscriptModal = {
         id: customer.customer_data._id,
       }
@@ -1034,7 +1045,7 @@ export default {
     closeUpdateNoteModal() {
       this.updateNoteModal = null
       this.showTranscriptModal = null
-      this.currentCallToHanlde = {}
+      this.currentCustomerToHanlde = {}
     },
     formatDate(value) {
       if (!value) return '-'
@@ -1146,6 +1157,7 @@ export default {
       this.selectedPayment = ''
       this.selectedDebt = ''
       this.selectedDialAgain = ''
+      this.selectedLeadSource = ''
       this.moreFilters = false
     },
   },
@@ -1195,6 +1207,10 @@ export default {
           customer.call_history[0].call_analysis.custom_analysis_data.weekly_payments ===
             this.selectedPayment
 
+        // Lead Sourcce filter
+        const leadSourceMatch =
+          !this.selectedLeadSource || customer.customer_data.lead_source === this.selectedLeadSource
+
         // Combine all filters
         return (
           dispositionMatch &&
@@ -1205,7 +1221,8 @@ export default {
           stageMatch &&
           dialedMatch &&
           debtAmountMatch &&
-          paymentMatch
+          paymentMatch &&
+          leadSourceMatch
         )
       })
     },
