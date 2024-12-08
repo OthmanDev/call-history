@@ -1023,9 +1023,9 @@ export default {
         queries = new URLSearchParams(queries).toString()
         const { data } = await ApiRequest().get(`/merged-data?${queries}`)
         this.allCustomers = data.data
-        this.isLoading = false
       } catch (e) {
         console.log(e)
+      } finally {
         this.isLoading = false
       }
     },
