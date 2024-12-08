@@ -26,46 +26,32 @@
           >
             <div class="p-3 grid gap-2">
               <span
-                @click="getInsightsByPeriod('today')"
+                @click="getCustomersByPeriod('today')"
                 class="cursor-pointer text-[15px]"
                 :class="[currentPediod.value === 'today' ? 'text-primary-100 font-medium' : '']"
                 >Today</span
               >
               <span
-                @click="getInsightsByPeriod('yesterday')"
+                @click="getCustomersByPeriod('yesterday')"
                 class="cursor-pointer text-[15px]"
                 :class="[currentPediod.value === 'yesterday' ? 'text-primary-100 font-medium' : '']"
                 >Yesterday</span
               >
               <span
-                @click="getInsightsByPeriod('last_7_days')"
+                @click="getCustomersByPeriod('last_3_days')"
+                class="cursor-pointer text-[15px]"
+                :class="[
+                  currentPediod.value === 'last_3_days' ? 'text-primary-100 font-medium' : '',
+                ]"
+                >Last 3 days</span
+              >
+              <span
+                @click="getCustomersByPeriod('last_7_days')"
                 class="cursor-pointer text-[15px]"
                 :class="[
                   currentPediod.value === 'last_7_days' ? 'text-primary-100 font-medium' : '',
                 ]"
                 >Last 7 days</span
-              >
-              <span
-                @click="getInsightsByPeriod('last_14_days')"
-                class="cursor-pointer text-[15px]"
-                :class="[
-                  currentPediod.value === 'last_14_days' ? 'text-primary-100 font-medium' : '',
-                ]"
-                >Last 14 days</span
-              >
-              <span
-                @click="getInsightsByPeriod('last_30_days')"
-                class="cursor-pointer text-[15px]"
-                :class="[
-                  currentPediod.value === 'last_30_days' ? 'text-primary-100 font-medium' : '',
-                ]"
-                >Last 30 days</span
-              >
-              <span
-                @click="getInsightsByPeriod('all_time')"
-                class="cursor-pointer text-[15px]"
-                :class="[currentPediod.value === 'all_time' ? 'text-primary-100 font-medium' : '']"
-                >All time</span
               >
             </div>
           </div>
@@ -109,6 +95,7 @@
             <span class="text-xl font-bold text-heading-100">Customers</span>
             <div class="flex items-center gap-2">
               <button
+                :class="[customers.length === 0 ? 'pointer-events-none opacity-50' : '']"
                 @click="moreFilters = !moreFilters"
                 class="flex items-center h-11 gap-5 px-4 bg-primary-100 text-white-100 rounded-md leading-none transition-all duration-150 hover:brightness-125 font-medium"
               >
@@ -121,6 +108,7 @@
                 />
               </button>
               <button
+                :class="[customers.length === 0 ? 'pointer-events-none opacity-50' : '']"
                 @click="exportCSV"
                 class="flex items-center h-11 px-4 bg-primary-100 text-white-100 rounded-md leading-none transition-all duration-150 hover:brightness-125 font-medium"
               >
@@ -131,9 +119,7 @@
         </div>
         <div v-if="moreFilters" class="border-b border-border-100 p-4">
           <div class="flex items-center flex-wrap gap-2">
-            <div
-              class="relative flex items-center border border-border-100 rounded-md max-w-[200px]"
-            >
+            <div class="relative flex items-center border border-border-100 rounded-md flex-1">
               <select
                 v-model="selectedDisposition"
                 class="w-full h-11 outline-none px-4 appearance-none cursor-pointer text-heading-100 rounded-md"
@@ -156,9 +142,7 @@
                 <X :size="10" :stroke-width="2" />
               </span>
             </div>
-            <div
-              class="relative flex items-center border border-border-100 rounded-md max-w-[200px]"
-            >
+            <div class="relative flex items-center border border-border-100 rounded-md flex-1">
               <select
                 v-model="selectedDisconnectionReason"
                 class="w-full h-11 outline-none px-4 appearance-none cursor-pointer text-heading-100 rounded-md"
@@ -185,19 +169,26 @@
                 <X :size="10" :stroke-width="2" />
               </span>
             </div>
-            <div class="h-11 border border-border-100 rounded-md px-4 flex items-center relative">
-              <div class="switcher">
-                <input
-                  id="has-debt"
-                  type="checkbox"
-                  :checked="hasDebtFilter"
-                  v-model="hasDebtFilter"
-                />
-                <label for="has-debt">Has Debt</label>
-              </div>
+            <div
+              class="relative flex items-center border border-border-100 rounded-md min-w-[130px]"
+            >
+              <select
+                v-model="selectedDebt"
+                class="w-full h-11 outline-none px-4 appearance-none cursor-pointer text-heading-100 rounded-md"
+              >
+                <option selected disabled value="">Has Debt</option>
+                <option v-for="(filter, key) in hasDebtFilter" :key="key" :value="filter">
+                  {{ filter }}
+                </option>
+              </select>
               <span
-                v-if="hasDebtFilter"
-                @click="hasDebtFilter = false"
+                class="absolute top-0 right-0 bottom-0 w-[40px] bg-white-100 pointer-events-none flex items-center justify-center rounded-tr-md rounded-br-md"
+              >
+                <ChevronDown :size="18" :stroke-width="1.75" />
+              </span>
+              <span
+                v-if="selectedDebt !== ''"
+                @click="selectedDebt = ''"
                 class="absolute -top-1 -right-1 w-[14px] h-[14px] bg-danger-100 text-white-100 flex items-center justify-center cursor-pointer rounded-full"
               >
                 <X :size="10" :stroke-width="2" />
@@ -228,27 +219,32 @@
                 <X :size="10" :stroke-width="2" />
               </span>
             </div>
-            <div class="h-11 border border-border-100 rounded-md px-4 flex items-center relative">
-              <div class="switcher">
-                <input
-                  id="dial-again"
-                  type="checkbox"
-                  :checked="dialAgainFilter"
-                  v-model="dialAgainFilter"
-                />
-                <label for="dial-again">Dial Again</label>
-              </div>
+            <div
+              class="relative flex items-center border border-border-100 rounded-md min-w-[150px]"
+            >
+              <select
+                v-model="selectedDialAgain"
+                class="w-full h-11 outline-none px-4 appearance-none cursor-pointer text-heading-100 rounded-md"
+              >
+                <option selected disabled value="">Dialed Again</option>
+                <option v-for="(filter, key) in dialAgainFilter" :key="key" :value="filter">
+                  {{ filter }}
+                </option>
+              </select>
               <span
-                v-if="dialAgainFilter"
-                @click="dialAgainFilter = false"
+                class="absolute top-0 right-0 bottom-0 w-[40px] bg-white-100 pointer-events-none flex items-center justify-center rounded-tr-md rounded-br-md"
+              >
+                <ChevronDown :size="18" :stroke-width="1.75" />
+              </span>
+              <span
+                v-if="selectedDialAgain !== ''"
+                @click="selectedDialAgain = ''"
                 class="absolute -top-1 -right-1 w-[14px] h-[14px] bg-danger-100 text-white-100 flex items-center justify-center cursor-pointer rounded-full"
               >
                 <X :size="10" :stroke-width="2" />
               </span>
             </div>
-            <div
-              class="relative flex items-center border border-border-100 rounded-md max-w-[200px]"
-            >
+            <div class="relative flex items-center border border-border-100 rounded-md w-[150px]">
               <select
                 v-model="selectedStage"
                 class="w-full h-11 outline-none px-4 appearance-none cursor-pointer text-heading-100 rounded-md"
@@ -271,23 +267,13 @@
                 <X :size="10" :stroke-width="2" />
               </span>
             </div>
-            <div
-              class="relative flex items-center border border-border-100 rounded-md min-w-[110px] max-w-[200px]"
-            >
-              <select
+            <div class="relative flex items-center border border-border-100 rounded-md w-[150px]">
+              <input
                 v-model="selectedState"
-                class="w-full h-11 outline-none px-4 appearance-none cursor-pointer text-heading-100 rounded-md"
-              >
-                <option selected disabled value="">State</option>
-                <option v-for="(filter, key) in satesFilter" :key="key" :value="filter">
-                  {{ filter }}
-                </option>
-              </select>
-              <span
-                class="absolute top-0 right-0 bottom-0 w-[40px] bg-white-100 pointer-events-none flex items-center justify-center rounded-tr-md rounded-br-md"
-              >
-                <ChevronDown :size="18" :stroke-width="1.75" />
-              </span>
+                type="text"
+                class="w-full h-11 outline-none px-4 text-heading-100 rounded-md"
+                placeholder="State"
+              />
               <span
                 v-if="selectedState !== ''"
                 @click="selectedState = ''"
@@ -296,9 +282,7 @@
                 <X :size="10" :stroke-width="2" />
               </span>
             </div>
-            <div
-              class="relative flex items-center border border-border-100 rounded-md max-w-[200px]"
-            >
+            <div class="relative flex items-center border border-border-100 rounded-md w-[150px]">
               <input
                 v-model="debtAmount"
                 type="number"
@@ -313,9 +297,7 @@
                 <X :size="10" :stroke-width="2" />
               </span>
             </div>
-            <div
-              class="relative flex items-center border border-border-100 rounded-md max-w-[200px]"
-            >
+            <div class="relative flex items-center border border-border-100 rounded-md w-[150px]">
               <input
                 v-model="selectedPayment"
                 type="number"
@@ -415,18 +397,13 @@
                     {{ customer.customer_data.BUSINESS || '-' }}
                   </td>
                   <td class="p-3 text-left font-medium text-[15px]">
-                    {{ customer.customer_data.PHONE || '-' }}
+                    {{ customer.customer_data.PHONE ? '+1' + customer.customer_data.PHONE : '-' }}
                   </td>
                   <td class="p-3 text-left font-medium text-[15px]">
                     {{ customer.customer_data.STATE || '-' }}
                   </td>
                   <td class="p-3 text-left font-medium text-[15px]">
-                    {{
-                      formatDuration(
-                        customer.call_history[0].end_timestamp,
-                        customer.call_history[0].start_timestamp,
-                      )
-                    }}
+                    {{ formatDuration(customer.call_history[0].call_cost.total_duration_seconds) }}
                   </td>
                   <td class="p-3 text-left font-medium text-[15px]">
                     <span
@@ -940,9 +917,9 @@ export default {
         'Error User Not Joined',
         'Registered Call Timeout',
       ],
-      hasDebtFilter: false,
+      hasDebtFilter: [true, false],
       dialedFilter: [0, 1, 2, 3, 4, 5],
-      dialAgainFilter: false,
+      dialAgainFilter: [true, false],
       moreFilters: false,
       satesFilter: ['FL', 'MD', 'TX', 'NY'],
       currentPediod: {
@@ -960,20 +937,12 @@ export default {
           value: 'yesterday',
         },
         {
+          label: 'Last 3 days',
+          value: 'last_3_days',
+        },
+        {
           label: 'Last 7 days',
           value: 'last_7_days',
-        },
-        {
-          label: 'Last 14 days',
-          value: 'last_14_days',
-        },
-        {
-          label: 'Last 30 days',
-          value: 'last_30_days',
-        },
-        {
-          label: 'All time',
-          value: 'all_time',
         },
       ],
       selectedDisposition: '',
@@ -983,6 +952,8 @@ export default {
       selectedDialed: '',
       debtAmount: '',
       selectedPayment: '',
+      selectedDebt: '',
+      selectedDialAgain: '',
     }
   },
   mounted() {
@@ -1001,11 +972,12 @@ export default {
           this.currentPage = 0
         }
         let queries = {
+          date_range: this.currentPediod.value,
           skip: this.currentPage,
           limit: 30,
         }
         queries = new URLSearchParams(queries).toString()
-        const { data } = await ApiRequest().get(`/merged-data?${queries}`)
+        const { data } = await ApiRequest().get(`/merged-data/filter?${queries}`)
         this.customers = data.data
       } catch (e) {
         console.log(e)
@@ -1017,11 +989,12 @@ export default {
       this.isLoading = true
       try {
         let queries = {
+          date_range: this.currentPediod.value,
           skip: 0,
           limit: 500,
         }
         queries = new URLSearchParams(queries).toString()
-        const { data } = await ApiRequest().get(`/merged-data?${queries}`)
+        const { data } = await ApiRequest().get(`/merged-data/filter?${queries}`)
         this.allCustomers = data.data
       } catch (e) {
         console.log(e)
@@ -1067,10 +1040,20 @@ export default {
       if (!value) return '-'
       return moment(value).format('MM/DD/YYYY HH:mm')
     },
-    formatDuration(start, end) {
-      if (!start || !end) return '-'
-      const duration = moment.duration(end - start)
-      return moment.utc(duration.asMilliseconds()).format('m:ss')
+    formatDuration(value) {
+      if (!value) return '-'
+      const totalSeconds = Number(value)
+      const duration = moment.duration(totalSeconds, 'seconds')
+      const hours = Math.floor(duration.asHours())
+      const minutes = duration.minutes()
+      const secs = duration.seconds()
+      if (hours > 0) {
+        return [hours, minutes.toString().padStart(2, '0'), secs.toString().padStart(2, '0')].join(
+          ':',
+        )
+      } else {
+        return [minutes.toString().padStart(2, '0'), secs.toString().padStart(2, '0')].join(':')
+      }
     },
     callStatus(value) {
       if (!value) return ''
@@ -1080,9 +1063,11 @@ export default {
     formattedTranscript(value) {
       return value.replace(/\n/g, '<span></span>')
     },
-    getInsightsByPeriod(period) {
+    getCustomersByPeriod(period) {
       this.isActivePeriod = false
       this.currentPediod = this.periods.find((p) => p.value === period)
+      this.loadCustomers(this.currentPage)
+      this.loadAllCustomers()
     },
     exportCSV() {
       const headers = [
@@ -1111,10 +1096,7 @@ export default {
           business: customer.customer_data.BUSINESS || '-',
           phone: customer.customer_data.PHONE || '-',
           state: customer.customer_data.STATE || '-',
-          duration: this.formatDuration(
-            customer.call_history[0].end_timestamp,
-            customer.call_history[0].start_timestamp,
-          ),
+          duration: this.formatDuration(customer.call_history[0].call_cost.total_duration_seconds),
           status: customer.call_history[0].call_status,
           disconnectionReason: customer.call_history[0].disconnection_reason,
           callCount: customer.call_history.length,
@@ -1162,8 +1144,8 @@ export default {
       this.selectedDialed = ''
       this.debtAmount = ''
       this.selectedPayment = ''
-      this.hasDebtFilter = false
-      this.dialAgainFilter = false
+      this.selectedDebt = ''
+      this.selectedDialAgain = ''
       this.moreFilters = false
     },
   },
@@ -1188,11 +1170,12 @@ export default {
 
         // Has Debt filter
         const hasDebtMatch =
-          !this.hasDebtFilter ||
-          customer.call_history[0].call_analysis.custom_analysis_data.has_debt
+          !this.selectedDebt ||
+          customer.call_history[0].call_analysis.custom_analysis_data.has_debt === this.selectedDebt
 
         // Dial Again filter
-        const dialAgainMatch = !this.dialAgainFilter || customer.call_history[0].dial_again
+        const dialAgainMatch =
+          !this.selectedDialAgain || customer.call_history[0].dial_again === this.selectedDialAgain
 
         // Stage filter
         const stageMatch = !this.selectedStage || customer.stage === this.selectedStage
