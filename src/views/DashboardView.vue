@@ -242,7 +242,7 @@
                 v-model="selectedDialAgain"
                 class="w-full h-11 outline-none px-4 appearance-none cursor-pointer text-heading-100 rounded-md"
               >
-                <option selected disabled value="">Dialed Again</option>
+                <option selected disabled value="-1">Dialed Again</option>
                 <option v-for="(filter, key) in dialAgainFilter" :key="key" :value="filter">
                   {{ filter ? 'Yes' : 'No' }}
                 </option>
@@ -253,8 +253,8 @@
                 <ChevronDown :size="18" :stroke-width="1.75" />
               </span>
               <span
-                v-if="selectedDialAgain !== ''"
-                @click="selectedDialAgain = ''"
+                v-if="selectedDialAgain !== '-1'"
+                @click="selectedDialAgain = '-1'"
                 class="absolute -top-1 -right-1 w-[14px] h-[14px] bg-danger-100 text-white-100 flex items-center justify-center cursor-pointer rounded-full"
               >
                 <X :size="10" :stroke-width="2" />
@@ -1016,7 +1016,7 @@ export default {
       debtAmount: '',
       selectedPayment: '',
       selectedDebt: '',
-      selectedDialAgain: '',
+      selectedDialAgain: '-1',
       selectedLeadSource: '',
     }
   },
@@ -1199,7 +1199,7 @@ export default {
       this.debtAmount = ''
       this.selectedPayment = ''
       this.selectedDebt = ''
-      this.selectedDialAgain = ''
+      this.selectedDialAgain = '-1'
       this.selectedLeadSource = ''
       this.moreFilters = false
     },
@@ -1278,7 +1278,7 @@ export default {
 
         // Dial Again filter
         const dialAgainMatch =
-          !this.selectedDialAgain || customer.call_history[0].dial_again === this.selectedDialAgain
+          this.selectedDialAgain === "-1" || customer.call_history[0].dial_again === this.selectedDialAgain
 
         // Stage filter
         const stageMatch =
