@@ -609,9 +609,9 @@
                             <span class="font-medium text-heading-100">Call To</span>:
                             {{ customer.call_history[0].to_number }}
                           </p>
-                          <p>
+                          <p v-if="customer.call_history[0].llm_latency">
                             <span class="font-medium text-heading-100">End to End Latency</span>:
-                            {{ customer.call_history[0].llm_latency.max }}ms
+                            {{ customer.call_history[0].llm_latency.max }} ms
                           </p>
                         </div>
                       </div>
