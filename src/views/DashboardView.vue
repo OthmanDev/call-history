@@ -1407,7 +1407,10 @@ export default {
     },
     closeUploadContactsModal() {
       this.showUploadContactsModal = false
-      this.upload.selectedCSV = null
+      this.upload = {
+        selectedCSV: null,
+        leadSource: '',
+      }
     },
     handleFileUpload(event) {
       const file = event.target.files[0]
