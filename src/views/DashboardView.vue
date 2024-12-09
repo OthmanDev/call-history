@@ -244,7 +244,7 @@
               >
                 <option selected disabled value="">Dialed Again</option>
                 <option v-for="(filter, key) in dialAgainFilter" :key="key" :value="filter">
-                  {{ filter }}
+                  {{ filter ? 'Yes' : 'No' }}
                 </option>
               </select>
               <span
@@ -355,10 +355,16 @@
                 <th class="p-3 text-left text-heading-100 text-[15px] capitalize font-semibold">
                   Duration
                 </th>
-                <th class="p-3 text-left text-heading-100 text-[15px] capitalize font-semibold">
+                <th
+                  v-if="false"
+                  class="p-3 text-left text-heading-100 text-[15px] capitalize font-semibold"
+                >
                   Status
                 </th>
-                <th class="p-3 text-left text-heading-100 text-[15px] capitalize font-semibold">
+                <th
+                  v-if="false"
+                  class="p-3 text-left text-heading-100 text-[15px] capitalize font-semibold"
+                >
                   Disconnection reasosn
                 </th>
                 <th class="p-3 text-left text-heading-100 text-[15px] capitalize font-semibold">
@@ -421,7 +427,7 @@
                   <td class="p-3 text-left font-medium text-[15px]">
                     {{ formatDuration(customer.call_history[0].call_cost.total_duration_seconds) }}
                   </td>
-                  <td class="p-3 text-left font-medium text-[15px]">
+                  <td v-if="false" class="p-3 text-left font-medium text-[15px]">
                     <span
                       class="inline-flex items-center text-center h-8 px-2 text-[15px] rounded-md bg-opacity-10 capitalize"
                       :class="callStatus(customer.call_history[0].call_status)"
@@ -429,7 +435,7 @@
                       {{ customer.call_history[0].call_status }}
                     </span>
                   </td>
-                  <td class="p-3 text-left font-medium text-[15px]">
+                  <td v-if="false" class="p-3 text-left font-medium text-[15px]">
                     <span
                       class="inline-flex items-center text-center h-8 px-2 text-[15px] rounded-md bg-[#F8F7FA]"
                     >
@@ -1127,8 +1133,6 @@ export default {
         'Phone',
         'State',
         'Duration',
-        'Status',
-        'Disconnection reasosn',
         'Call Count',
         'Weekly Payments',
         'Has Debt',
@@ -1147,8 +1151,6 @@ export default {
           phone: customer.customer_data.PHONE || '-',
           state: customer.customer_data.STATE || '-',
           duration: this.formatDuration(customer.call_history[0].call_cost.total_duration_seconds),
-          status: customer.call_history[0].call_status,
-          disconnectionReason: customer.call_history[0].disconnection_reason,
           callCount: customer.call_history.length,
           weeklyPayments:
             customer.call_history[0].call_analysis.custom_analysis_data.hasOwnProperty(
