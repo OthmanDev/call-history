@@ -980,6 +980,7 @@
               class="border border-border-100 w-full h-11 outline-none px-4 text-heading-100 rounded-md"
             />
             <button
+              @click="uploadCSV"
               :class="[
                 !upload.selectedCSV || !upload.leadSource ? 'pointer-events-none opacity-50' : '',
               ]"
@@ -1428,6 +1429,32 @@ export default {
         return
       }
       this.upload.selectedCSV = file
+    },
+    async uploadCSV() {
+      this.isLoading = true
+      try {
+        const payload = {
+          file: this.upload.selectedCSV,
+          lead_source: this.upload.leadSource,
+        }
+        const { data } = await ApiRequest().post(`/upload-csv`, payload, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        })
+        if (data) {
+          this.toast = {
+            active: true,
+            message: data.message,
+            type: 'success',
+          }
+          this.closeUploadContactsModal()
+        }
+      } catch (e) {
+        console.log(e)
+      } finally {
+        this.isLoading = false
+      }
     },
   },
   computed: {
