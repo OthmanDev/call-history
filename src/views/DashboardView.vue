@@ -265,9 +265,9 @@
                 v-model="selectedStage"
                 class="w-full h-11 outline-none px-4 appearance-none cursor-pointer text-heading-100 rounded-md"
               >
-                <option selected disabled value="">Stage</option>
-                <option v-for="(filter, key) in stages" :key="key" :value="filter">
-                  {{ filter }}
+                <option selected disabled value="-1">Stage</option>
+                <option v-for="(filter, key) in stages" :key="key" :value="filter.key">
+                  {{ filter.value }}
                 </option>
               </select>
               <span
@@ -276,8 +276,8 @@
                 <ChevronDown :size="18" :stroke-width="1.75" />
               </span>
               <span
-                v-if="selectedStage !== ''"
-                @click="selectedStage = ''"
+                v-if="selectedStage !== '-1'"
+                @click="selectedStage = '-1'"
                 class="absolute -top-1 -right-1 w-[14px] h-[14px] bg-danger-100 text-white-100 flex items-center justify-center cursor-pointer rounded-full"
               >
                 <X :size="10" :stroke-width="2" />
@@ -508,9 +508,9 @@
                         @change="updateStage($event, customer)"
                         class="w-full h-10 outline-none px-2 appearance-none cursor-pointer text-heading-100"
                       >
-                        <option disabled selected value="-1">Stage</option>
-                        <option v-for="stage in stages" :key="stage" :value="stage">
-                          {{ stage }}
+                        <option disabled selected value="">Stage</option>
+                        <option v-for="stage in stages" :key="stage.key" :value="stage.key">
+                          {{ stage.value }}
                         </option>
                       </select>
                       <span
@@ -791,7 +791,7 @@
             <textarea
               class="w-full border border-border-100 rounded-md px-4 py-3 outline-none"
               placeholder="Notes..."
-              v-model="currentCustomerToHanlde.customer_data.NOTES"
+              v-model="currentCustomerToHanlde.customer_data.notes"
               rows="2"
             ></textarea>
           </div>
@@ -855,6 +855,21 @@
     >
       <LoaderCircle :size="50" :stroke-width="1" class="spin" />
     </div>
+    <div
+      class="fixed bottom-4 right-0 z-[10000] transition-transform transform duration-300"
+      :class="[toast.active ? '-translate-x-4' : 'translate-x-full']"
+    >
+      <div
+        @click="disableToast"
+        class="rounded-lg p-5 min-w-[350px] max-w-[500px] flex items-center justify-between gap-5 cursor-pointer"
+        :class="[toast.type === 'error' ? 'bg-danger-100' : 'bg-success-100']"
+      >
+        <p class="text-[17px] font-medium text-white-100 drop-shadow-md">{{ toast.message }}</p>
+        <span class="block -mx-1 mt-[1px] text-white-100"
+          ><CircleX :size="20" :stroke-width="1.75"
+        /></span>
+      </div>
+    </div>
   </main>
 </template>
 
@@ -868,6 +883,7 @@ import {
   FilePenLine,
   X,
   LoaderCircle,
+  CircleX,
 } from 'lucide-vue-next'
 import ApiRequest from '@/libs/ApiRequest'
 import moment from 'moment'
@@ -882,17 +898,41 @@ export default {
     FilePenLine,
     X,
     LoaderCircle,
+    CircleX,
   },
   data() {
     return {
+      toast: {
+        active: false,
+        message: '',
+        type: '',
+      },
       expandedRowId: null,
       stages: [
-        'Closer qualified, follow up',
-        'Quote sent, awaiting agreements',
-        'Agreements received',
-        'Closing call follow up',
-        'Closed',
-        'Paid',
+        {
+          key: 0,
+          value: 'Closer qualified, follow up',
+        },
+        {
+          key: 1,
+          value: 'Quote sent, awaiting agreements',
+        },
+        {
+          key: 2,
+          value: 'Agreements received',
+        },
+        {
+          key: 3,
+          value: 'Closing call follow up',
+        },
+        {
+          key: 4,
+          value: 'Closed',
+        },
+        {
+          key: 5,
+          value: 'Paid',
+        },
       ],
       updateNoteModal: null,
       showTranscriptModal: null,
@@ -966,7 +1006,7 @@ export default {
       selectedDisposition: '',
       selectedDisconnectionReason: '',
       selectedState: '',
-      selectedStage: '',
+      selectedStage: '-1',
       selectedDialed: '',
       debtAmount: '',
       selectedPayment: '',
@@ -1025,10 +1065,10 @@ export default {
       this.expandedRowId = this.expandedRowId === id ? null : id
     },
     updateStage(event, customer) {
-      console.log(customer.customer_data._id, event.target.value)
+      this.updateNotesOrStage('stage', customer.customer_data._id, event.target.value)
     },
     updateNotes(customer) {
-      console.log(customer.customer_data._id, customer.customer_data.NOTES)
+      this.updateNotesOrStage('notes', customer.customer_data._id, customer.customer_data.notes)
     },
     showUpdateNoteModal(customer) {
       this.currentCustomerToHanlde = customer
@@ -1151,7 +1191,7 @@ export default {
       this.selectedDisposition = ''
       this.selectedDisconnectionReason = ''
       this.selectedState = ''
-      this.selectedStage = ''
+      this.selectedStage = '-1'
       this.selectedDialed = ''
       this.debtAmount = ''
       this.selectedPayment = ''
@@ -1159,6 +1199,54 @@ export default {
       this.selectedDialAgain = ''
       this.selectedLeadSource = ''
       this.moreFilters = false
+    },
+    async updateNotesOrStage(type, id, value) {
+      this.isLoading = true
+      try {
+        const payload = {}
+        if (type === 'notes') {
+          if (!value) {
+            this.toast = {
+              active: true,
+              message: 'Notes field is required',
+              type: 'error',
+            }
+            return
+          }
+          payload.notes = value
+        } else {
+          payload.stage = value
+        }
+        const { data } = await ApiRequest().put(`/update-merged-data/${id}`, payload)
+        if (data) {
+          this.closeUpdateNoteModal()
+          if (type === 'notes') {
+            this.toast = {
+              active: true,
+              message: 'Notes updated successfully!',
+              type: 'success',
+            }
+          } else {
+            this.toast = {
+              active: true,
+              message: 'Stage updated successfully!',
+              type: 'success',
+            }
+          }
+          this.loadCustomers(this.currentPage)
+        }
+      } catch (e) {
+        console.log(e)
+      } finally {
+        this.isLoading = false
+      }
+    },
+    disableToast() {
+      this.toast = {
+        show: false,
+        message: '',
+        type: '',
+      }
     },
   },
   computed: {
@@ -1190,7 +1278,8 @@ export default {
           !this.selectedDialAgain || customer.call_history[0].dial_again === this.selectedDialAgain
 
         // Stage filter
-        const stageMatch = !this.selectedStage || customer.stage === this.selectedStage
+        const stageMatch =
+          this.selectedStage === '-1' || customer.customer_data.stage === this.selectedStage
 
         // Dialed filter
         const dialedMatch =
