@@ -1139,7 +1139,7 @@ export default {
       ]
       const csv = []
       csv.push(headers.join(','))
-      this.customers.forEach((customer) => {
+      this.filteredCustomers.forEach((customer) => {
         const row = {
           dateTime: this.formatDate(customer.call_history[0]?.start_timestamp),
           name: customer.customer_data.OWNER || '-',
