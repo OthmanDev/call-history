@@ -1176,7 +1176,9 @@ export default {
           )
             ? customer.call_history[0].call_analysis.custom_analysis_data.disposition
             : '-',
-          Stage: '-',
+          Stage: customer.customer_data.stage
+            ? this.stages.find((s) => s.key === customer.customer_data.stage).value
+            : '-',
         }
         csv.push(Object.values(row).join(','))
       })
