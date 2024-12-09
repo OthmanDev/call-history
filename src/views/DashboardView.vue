@@ -979,7 +979,6 @@ export default {
       dialedFilter: [0, 1, 2, 3, 4, 5],
       dialAgainFilter: [true, false],
       moreFilters: false,
-      satesFilter: ['FL', 'MD', 'TX', 'NY'],
       currentPediod: {
         label: 'Today',
         value: 'today',
