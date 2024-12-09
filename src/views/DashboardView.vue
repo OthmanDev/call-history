@@ -1101,7 +1101,9 @@ export default {
         'Has Debt and Interested',
         'Has Debt and Not Interested',
         'Does Not Have Debt',
-        'Uncertain/Unable to Determine',
+        'Goes to Voicemail',
+        'User hangs up',
+        '(DNC) Do not call list'
       ],
       disconnectionReasonFilter: [
         'User Hangup',
