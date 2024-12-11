@@ -152,33 +152,6 @@
                 <X :size="10" :stroke-width="2" />
               </span>
             </div>
-            <div class="relative flex items-center border border-border-100 rounded-md flex-1">
-              <select
-                v-model="selectedDisconnectionReason"
-                class="w-full h-11 outline-none px-4 appearance-none cursor-pointer text-heading-100 rounded-md"
-              >
-                <option selected disabled value="">Disconnection Reason</option>
-                <option
-                  v-for="(filter, key) in disconnectionReasonFilter"
-                  :key="key"
-                  :value="filter"
-                >
-                  {{ filter }}
-                </option>
-              </select>
-              <span
-                class="absolute top-0 right-0 bottom-0 w-[40px] bg-white-100 pointer-events-none flex items-center justify-center rounded-tr-md rounded-br-md"
-              >
-                <ChevronDown :size="18" :stroke-width="1.75" />
-              </span>
-              <span
-                v-if="selectedDisconnectionReason !== ''"
-                @click="selectedDisconnectionReason = ''"
-                class="absolute -top-1 -right-1 w-[14px] h-[14px] bg-danger-100 text-white-100 flex items-center justify-center cursor-pointer rounded-full"
-              >
-                <X :size="10" :stroke-width="2" />
-              </span>
-            </div>
             <div
               class="relative flex items-center border border-border-100 rounded-md min-w-[130px]"
             >
@@ -214,57 +187,6 @@
               <span
                 v-if="selectedLeadSource !== ''"
                 @click="selectedLeadSource = ''"
-                class="absolute -top-1 -right-1 w-[14px] h-[14px] bg-danger-100 text-white-100 flex items-center justify-center cursor-pointer rounded-full"
-              >
-                <X :size="10" :stroke-width="2" />
-              </span>
-            </div>
-            <div
-              v-if="false"
-              class="relative flex items-center border border-border-100 rounded-md min-w-[110px]"
-            >
-              <select
-                v-model="selectedDialed"
-                class="w-full h-11 outline-none px-4 appearance-none cursor-pointer text-heading-100 rounded-md"
-              >
-                <option selected disabled value="">Dialed</option>
-                <option v-for="(filter, key) in dialedFilter" :key="key" :value="filter">
-                  {{ filter }}
-                </option>
-              </select>
-              <span
-                class="absolute top-0 right-0 bottom-0 w-[40px] bg-white-100 pointer-events-none flex items-center justify-center rounded-tr-md rounded-br-md"
-              >
-                <ChevronDown :size="18" :stroke-width="1.75" />
-              </span>
-              <span
-                v-if="selectedDialed !== ''"
-                @click="selectedDialed = ''"
-                class="absolute -top-1 -right-1 w-[14px] h-[14px] bg-danger-100 text-white-100 flex items-center justify-center cursor-pointer rounded-full"
-              >
-                <X :size="10" :stroke-width="2" />
-              </span>
-            </div>
-            <div
-              class="relative flex items-center border border-border-100 rounded-md min-w-[150px]"
-            >
-              <select
-                v-model="selectedDialAgain"
-                class="w-full h-11 outline-none px-4 appearance-none cursor-pointer text-heading-100 rounded-md"
-              >
-                <option selected disabled value="-1">Dialed Again</option>
-                <option v-for="(filter, key) in dialAgainFilter" :key="key" :value="filter">
-                  {{ filter ? 'Yes' : 'No' }}
-                </option>
-              </select>
-              <span
-                class="absolute top-0 right-0 bottom-0 w-[40px] bg-white-100 pointer-events-none flex items-center justify-center rounded-tr-md rounded-br-md"
-              >
-                <ChevronDown :size="18" :stroke-width="1.75" />
-              </span>
-              <span
-                v-if="selectedDialAgain !== '-1'"
-                @click="selectedDialAgain = '-1'"
                 class="absolute -top-1 -right-1 w-[14px] h-[14px] bg-danger-100 text-white-100 flex items-center justify-center cursor-pointer rounded-full"
               >
                 <X :size="10" :stroke-width="2" />
@@ -420,7 +342,7 @@
                     </button>
                   </td>
                   <td class="p-3 text-left font-medium text-[15px]">
-                    {{ formatDate(customer.call_history[0]?.start_timestamp) }}
+                    {{ formatDate(customer.call_history?.start_timestamp) }}
                   </td>
                   <td class="p-3 text-left font-medium text-[15px]">
                     {{ customer.customer_data.OWNER || '-' }}
@@ -429,27 +351,27 @@
                     {{ customer.customer_data.BUSINESS || '-' }}
                   </td>
                   <td class="p-3 text-left font-medium text-[15px]">
-                    {{ customer.customer_data.PHONE ? '+1' + customer.customer_data.PHONE : '-' }}
+                    {{ customer.customer_data.PHONE ? customer.customer_data.PHONE : '-' }}
                   </td>
                   <td class="p-3 text-left font-medium text-[15px]">
                     {{ customer.customer_data.STATE || '-' }}
                   </td>
                   <td class="p-3 text-left font-medium text-[15px]">
-                    {{ formatDuration(customer.call_history[0].call_cost.total_duration_seconds) }}
+                    {{ formatDuration(customer.call_history.call_cost.total_duration_seconds) }}
                   </td>
                   <td v-if="false" class="p-3 text-left font-medium text-[15px]">
                     <span
                       class="inline-flex items-center text-center h-8 px-2 text-[15px] rounded-md bg-opacity-10 capitalize"
-                      :class="callStatus(customer.call_history[0].call_status)"
+                      :class="callStatus(customer.call_history.call_status)"
                     >
-                      {{ customer.call_history[0].call_status }}
+                      {{ customer.call_history.call_status }}
                     </span>
                   </td>
                   <td v-if="false" class="p-3 text-left font-medium text-[15px]">
                     <span
                       class="inline-flex items-center text-center h-8 px-2 text-[15px] rounded-md bg-[#F8F7FA]"
                     >
-                      {{ customer.call_history[0].disconnection_reason }}
+                      {{ customer.call_history.disconnection_reason }}
                     </span>
                   </td>
                   <td class="p-3 text-left font-medium text-[15px]">
@@ -458,11 +380,10 @@
                   <td class="p-3 text-left font-medium text-[15px]">
                     <span>
                       {{
-                        customer.call_history[0].call_analysis.custom_analysis_data.hasOwnProperty(
+                        customer.call_history.call_analysis.custom_analysis_data.hasOwnProperty(
                           'weekly_payments',
                         )
-                          ? customer.call_history[0].call_analysis.custom_analysis_data
-                              .weekly_payments
+                          ? customer.call_history.call_analysis.custom_analysis_data.weekly_payments
                           : '-'
                       }}</span
                     >
@@ -470,25 +391,23 @@
                   <td class="p-3 text-left font-medium text-[15px]">
                     <span
                       v-if="
-                        customer.call_history[0].call_analysis.custom_analysis_data.hasOwnProperty(
+                        customer.call_history.call_analysis.custom_analysis_data.hasOwnProperty(
                           'has_debt',
                         )
                       "
                       class="inline-flex items-center text-center h-8 px-2 text-[15px] rounded-md bg-[#F8F7FA]"
                     >
-                      {{
-                        customer.call_history[0].call_analysis.custom_analysis_data.has_debt
-                      }}</span
+                      {{ customer.call_history.call_analysis.custom_analysis_data.has_debt }}</span
                     >
                     <span v-else>-</span>
                   </td>
                   <td class="p-3 text-left font-medium text-[15px]">
                     <span>
                       {{
-                        customer.call_history[0].call_analysis.custom_analysis_data.hasOwnProperty(
+                        customer.call_history.call_analysis.custom_analysis_data.hasOwnProperty(
                           'total_debt',
                         )
-                          ? customer.call_history[0].call_analysis.custom_analysis_data.total_debt
+                          ? customer.call_history.call_analysis.custom_analysis_data.total_debt
                           : '-'
                       }}</span
                     >
@@ -496,10 +415,10 @@
                   <td class="p-3 text-left font-medium text-[15px]">
                     <span>
                       {{
-                        customer.call_history[0].call_analysis.custom_analysis_data.hasOwnProperty(
+                        customer.call_history.call_analysis.custom_analysis_data.hasOwnProperty(
                           'advances',
                         )
-                          ? customer.call_history[0].call_analysis.custom_analysis_data.advances
+                          ? customer.call_history.call_analysis.custom_analysis_data.advances
                           : '-'
                       }}</span
                     >
@@ -507,10 +426,10 @@
                   <td class="p-3 text-left font-medium text-[15px]">
                     <span>
                       {{
-                        customer.call_history[0].call_analysis.custom_analysis_data.hasOwnProperty(
+                        customer.call_history.call_analysis.custom_analysis_data.hasOwnProperty(
                           'disposition',
                         )
-                          ? customer.call_history[0].call_analysis.custom_analysis_data.disposition
+                          ? customer.call_history.call_analysis.custom_analysis_data.disposition
                           : '-'
                       }}</span
                     >
@@ -539,7 +458,7 @@
                   <td class="p-3 text-left font-medium text-[15px]">
                     <div class="flex items-center gap-2">
                       <span
-                        v-if="customer.call_history[0]?.transcript"
+                        v-if="customer.call_history?.transcript"
                         @click="showTranscriptPreviewModal(customer)"
                         class="cursor-pointer transition-colors duration-150 hover:text-info-100"
                         title="Show Transcript"
@@ -601,27 +520,27 @@
                         <div class="p-4 grid gap-2">
                           <p>
                             <span class="font-medium text-heading-100">Call ID</span>:
-                            {{ customer.call_history[0].call_id }}
+                            {{ customer.call_history.call_id }}
                           </p>
-                          <p v-if="customer.call_history[0].disconnection_reason">
+                          <p v-if="customer.call_history.disconnection_reason">
                             <span class="font-medium text-heading-100">Disconnection Reason</span>:
-                            {{ customer.call_history[0].disconnection_reason }}
+                            {{ customer.call_history.disconnection_reason }}
                           </p>
-                          <p v-if="customer.call_history[0].call_analysis?.user_sentiment">
+                          <p v-if="customer.call_history.call_analysis?.user_sentiment">
                             <span class="font-medium text-heading-100">User Sentiment</span>:
-                            {{ customer.call_history[0].call_analysis.user_sentiment }}
+                            {{ customer.call_history.call_analysis.user_sentiment }}
                           </p>
                           <p>
                             <span class="font-medium text-heading-100">Call From</span>:
-                            {{ customer.call_history[0].from_number }}
+                            {{ customer.call_history.from_number }}
                           </p>
                           <p>
                             <span class="font-medium text-heading-100">Call To</span>:
-                            {{ customer.call_history[0].to_number }}
+                            {{ customer.call_history.to_number }}
                           </p>
-                          <p v-if="customer.call_history[0].llm_latency">
+                          <p v-if="customer.call_history.llm_latency">
                             <span class="font-medium text-heading-100">End to End Latency</span>:
-                            {{ customer.call_history[0].llm_latency.max }} ms
+                            {{ customer.call_history.llm_latency.max }} ms
                           </p>
                         </div>
                       </div>
@@ -852,7 +771,7 @@
           <div class="p-4 bg-[#F8F7FA] border border-border-100 rounded-md">
             <div
               class="text-heading-100 grid gap-1"
-              v-html="formattedTranscript(currentCustomerToHanlde.call_history[0].transcript)"
+              v-html="formattedTranscript(currentCustomerToHanlde.call_history.transcript)"
             ></div>
           </div>
         </div>
@@ -1102,40 +1021,12 @@ export default {
         'Has Debt and Not Interested',
         'Does Not Have Debt',
         'Goes to Voicemail',
-        'User hangs up',
-        '(DNC) Do not call list'
-      ],
-      disconnectionReasonFilter: [
-        'User Hangup',
-        'Agent Hangup',
-        'Call Transfer',
-        'Voicemail Reached',
-        'Inactivity',
-        'Machine Detected',
-        'Max Duration Reached',
-        'Concurrency Limit Reached',
-        'No Valid Payment',
-        'Scam Detected',
-        'Error Inbound Webhook',
-        'Dial Busy',
-        'Dial Failed',
-        'Dial No Answer',
-        'Error Llm Websocket Open',
-        'Error Llm Websocket Lost Connection',
-        'Error Llm Websocket Runtime',
-        'Error Llm Websocket Corrupt Payload',
-        'Error Frontend Corrupted Payload',
-        'Error Twilio',
-        'Error No Audio Received',
-        'Error Asr',
-        'Error Retell',
-        'Error Unknown',
-        'Error User Not Joined',
-        'Registered Call Timeout',
+        'Caller Hangs Up',
+        '(DNC) Do Not Call List',
+        'Please Remove',
+        'Uncertain',
       ],
       hasDebtFilter: [true, false],
-      dialedFilter: [0, 1, 2, 3, 4, 5],
-      dialAgainFilter: [true, false],
       moreFilters: false,
       currentPediod: {
         label: 'Today',
@@ -1161,14 +1052,11 @@ export default {
         },
       ],
       selectedDisposition: '',
-      selectedDisconnectionReason: '',
       selectedState: '',
       selectedStage: '-1',
-      selectedDialed: '',
       debtAmount: '',
       selectedPayment: '',
       selectedDebt: '',
-      selectedDialAgain: '-1',
       selectedLeadSource: '',
       showUploadContactsModal: false,
       upload: {
@@ -1198,7 +1086,7 @@ export default {
           limit: 30,
         }
         queries = new URLSearchParams(queries).toString()
-        const { data } = await ApiRequest().get(`/merged-data/filter?${queries}`)
+        const { data } = await ApiRequest().get(`/merged-data?${queries}`)
         this.customers = data.data
       } catch (e) {
         console.log(e)
@@ -1209,14 +1097,6 @@ export default {
     async loadAllCustomers() {
       this.isLoading = true
       try {
-        let queries = {
-          date_range: this.currentPediod.value,
-          skip: 0,
-          limit: 500,
-        }
-        queries = new URLSearchParams(queries).toString()
-        const { data } = await ApiRequest().get(`/merged-data/filter?${queries}`)
-        this.allCustomers = data.data
       } catch (e) {
         console.log(e)
       } finally {
@@ -1280,7 +1160,6 @@ export default {
       this.isActivePeriod = false
       this.currentPediod = this.periods.find((p) => p.value === period)
       this.loadCustomers(this.currentPage)
-      this.loadAllCustomers()
     },
     exportCSV() {
       const headers = [
@@ -1302,38 +1181,37 @@ export default {
       csv.push(headers.join(','))
       this.filteredCustomers.forEach((customer) => {
         const row = {
-          dateTime: this.formatDate(customer.call_history[0]?.start_timestamp),
+          dateTime: this.formatDate(customer.call_history?.start_timestamp),
           name: customer.customer_data.OWNER || '-',
           business: customer.customer_data.BUSINESS || '-',
           phone: customer.customer_data.PHONE || '-',
           state: customer.customer_data.STATE || '-',
-          duration: this.formatDuration(customer.call_history[0].call_cost.total_duration_seconds),
+          duration: this.formatDuration(customer.call_history.call_cost.total_duration_seconds),
           callCount: customer.call_history.length,
-          weeklyPayments:
-            customer.call_history[0].call_analysis.custom_analysis_data.hasOwnProperty(
-              'weekly_payments',
-            )
-              ? customer.call_history[0].call_analysis.custom_analysis_data.weekly_payments
-              : '-',
-          hasDebt: customer.call_history[0].call_analysis.custom_analysis_data.hasOwnProperty(
+          weeklyPayments: customer.call_history.call_analysis.custom_analysis_data.hasOwnProperty(
+            'weekly_payments',
+          )
+            ? customer.call_history.call_analysis.custom_analysis_data.weekly_payments
+            : '-',
+          hasDebt: customer.call_history.call_analysis.custom_analysis_data.hasOwnProperty(
             'has_debt',
           )
-            ? customer.call_history[0].call_analysis.custom_analysis_data.has_debt
+            ? customer.call_history.call_analysis.custom_analysis_data.has_debt
             : '-',
-          TotalDebt: customer.call_history[0].call_analysis.custom_analysis_data.hasOwnProperty(
+          TotalDebt: customer.call_history.call_analysis.custom_analysis_data.hasOwnProperty(
             'total_debt',
           )
-            ? customer.call_history[0].call_analysis.custom_analysis_data.total_debt
+            ? customer.call_history.call_analysis.custom_analysis_data.total_debt
             : '-',
-          TotalDebt: customer.call_history[0].call_analysis.custom_analysis_data.hasOwnProperty(
+          TotalDebt: customer.call_history.call_analysis.custom_analysis_data.hasOwnProperty(
             'advances',
           )
-            ? customer.call_history[0].call_analysis.custom_analysis_data.advances
+            ? customer.call_history.call_analysis.custom_analysis_data.advances
             : '-',
-          Disposition: customer.call_history[0].call_analysis.custom_analysis_data.hasOwnProperty(
+          Disposition: customer.call_history.call_analysis.custom_analysis_data.hasOwnProperty(
             'disposition',
           )
-            ? customer.call_history[0].call_analysis.custom_analysis_data.disposition
+            ? customer.call_history.call_analysis.custom_analysis_data.disposition
             : '-',
           Stage: customer.customer_data.stage
             ? this.stages.find((s) => s.key === customer.customer_data.stage).value
@@ -1349,14 +1227,11 @@ export default {
     },
     clearFilters() {
       this.selectedDisposition = ''
-      this.selectedDisconnectionReason = ''
       this.selectedState = ''
       this.selectedStage = '-1'
-      this.selectedDialed = ''
       this.debtAmount = ''
       this.selectedPayment = ''
       this.selectedDebt = ''
-      this.selectedDialAgain = '-1'
       this.selectedLeadSource = ''
       this.moreFilters = false
     },
@@ -1465,14 +1340,8 @@ export default {
         // Disposition filter
         const dispositionMatch =
           !this.selectedDisposition ||
-          customer.call_history[0].call_analysis.custom_analysis_data.disposition ===
+          customer.call_history.call_analysis.custom_analysis_data.disposition ===
             this.selectedDisposition
-
-        // Disconnection Reason filter
-        const disconnectionReasonMatch =
-          !this.selectedDisconnectionReason ||
-          customer.call_history[0].disconnection_reason ===
-            this.selectedDisconnectionReason.toLowerCase().replaceAll(' ', '_')
 
         // States filter
         const stateMatch =
@@ -1481,30 +1350,21 @@ export default {
         // Has Debt filter
         const hasDebtMatch =
           !this.selectedDebt ||
-          customer.call_history[0].call_analysis.custom_analysis_data.has_debt === this.selectedDebt
-
-        // Dial Again filter
-        const dialAgainMatch =
-          this.selectedDialAgain === '-1' ||
-          customer.call_history[0].dial_again === this.selectedDialAgain
+          customer.call_history.call_analysis.custom_analysis_data.has_debt === this.selectedDebt
 
         // Stage filter
         const stageMatch =
           this.selectedStage === '-1' || customer.customer_data.stage === this.selectedStage
 
-        // Dialed filter
-        const dialedMatch =
-          !this.selectedDialed || customer.call_history[0].redialed_count === this.selectedDialed
-
         // Debt Amount filter
         const debtAmountMatch =
           !this.debtAmount ||
-          customer.call_history[0].call_analysis.custom_analysis_data.total_debt === this.debtAmount
+          customer.call_history.call_analysis.custom_analysis_data.total_debt === this.debtAmount
 
         // Payemnt filter
         const paymentMatch =
           !this.selectedPayment ||
-          customer.call_history[0].call_analysis.custom_analysis_data.weekly_payments ===
+          customer.call_history.call_analysis.custom_analysis_data.weekly_payments ===
             this.selectedPayment
 
         // Lead Sourcce filter
@@ -1514,12 +1374,9 @@ export default {
         // Combine all filters
         return (
           dispositionMatch &&
-          disconnectionReasonMatch &&
           stateMatch &&
           hasDebtMatch &&
-          dialAgainMatch &&
           stageMatch &&
-          dialedMatch &&
           debtAmountMatch &&
           paymentMatch &&
           leadSourceMatch
