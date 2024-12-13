@@ -84,7 +84,7 @@
               <h4 class="text-2xl font-bold text-heading-100 mb-1 uppercase">
                 {{ connectedCalls }}
               </h4>
-              <span class="text-[17px] capitalize">Connected Calls</span>
+              <span class="text-[17px] capitalize">Picked Up Calls</span>
             </div>
           </div>
         </div>
@@ -152,9 +152,7 @@
                 <X :size="10" :stroke-width="2" />
               </span>
             </div>
-            <div
-              class="relative flex items-center border border-border-100 rounded-md min-w-[130px]"
-            >
+            <div class="relative flex items-center border border-border-100 rounded-md flex-1">
               <select
                 v-model="selectedDebt"
                 class="w-full h-11 outline-none px-4 appearance-none cursor-pointer text-heading-100 rounded-md"
@@ -177,7 +175,7 @@
                 <X :size="10" :stroke-width="2" />
               </span>
             </div>
-            <div class="relative flex items-center border border-border-100 rounded-md w-[200px]">
+            <div class="relative flex items-center border border-border-100 rounded-md flex-1">
               <input
                 v-model="selectedLeadSource"
                 type="text"
@@ -192,7 +190,7 @@
                 <X :size="10" :stroke-width="2" />
               </span>
             </div>
-            <div class="relative flex items-center border border-border-100 rounded-md w-[150px]">
+            <div class="relative flex items-center border border-border-100 rounded-md flex-1">
               <select
                 v-model="selectedStage"
                 class="w-full h-11 outline-none px-4 appearance-none cursor-pointer text-heading-100 rounded-md"
@@ -215,7 +213,7 @@
                 <X :size="10" :stroke-width="2" />
               </span>
             </div>
-            <div class="relative flex items-center border border-border-100 rounded-md w-[150px]">
+            <div class="relative flex items-center border border-border-100 rounded-md flex-1">
               <input
                 v-model="selectedState"
                 type="text"
@@ -230,7 +228,7 @@
                 <X :size="10" :stroke-width="2" />
               </span>
             </div>
-            <div class="relative flex items-center border border-border-100 rounded-md w-[150px]">
+            <div class="relative flex items-center border border-border-100 rounded-md flex-1">
               <input
                 v-model="debtAmount"
                 type="number"
@@ -245,7 +243,7 @@
                 <X :size="10" :stroke-width="2" />
               </span>
             </div>
-            <div class="relative flex items-center border border-border-100 rounded-md w-[150px]">
+            <div class="relative flex items-center border border-border-100 rounded-md flex-1">
               <input
                 v-model="selectedPayment"
                 type="number"
@@ -287,16 +285,10 @@
                 <th class="p-3 text-left text-heading-100 text-[15px] capitalize font-semibold">
                   Duration
                 </th>
-                <th
-                  v-if="false"
-                  class="p-3 text-left text-heading-100 text-[15px] capitalize font-semibold"
-                >
+                <th class="p-3 text-left text-heading-100 text-[15px] capitalize font-semibold">
                   Status
                 </th>
-                <th
-                  v-if="false"
-                  class="p-3 text-left text-heading-100 text-[15px] capitalize font-semibold"
-                >
+                <th class="p-3 text-left text-heading-100 text-[15px] capitalize font-semibold">
                   Disconnection reasosn
                 </th>
                 <th class="p-3 text-left text-heading-100 text-[15px] capitalize font-semibold">
@@ -320,9 +312,9 @@
                 <th class="p-3 text-left text-heading-100 text-[15px] capitalize font-semibold">
                   Stage
                 </th>
-                <th
-                  class="p-3 text-left text-heading-100 text-[15px] capitalize font-semibold"
-                ></th>
+                <th class="p-3 text-left text-heading-100 text-[15px] capitalize font-semibold">
+                  Actions
+                </th>
               </tr>
             </thead>
             <tbody class="divide-y divide-border-100">
@@ -342,72 +334,64 @@
                     </button>
                   </td>
                   <td class="p-3 text-left font-medium text-[15px]">
-                    {{ formatDate(customer.call_history?.start_timestamp) }}
+                    {{ formatDate(customer?.start_timestamp) }}
                   </td>
                   <td class="p-3 text-left font-medium text-[15px]">
-                    {{ customer.customer_data.OWNER || '-' }}
+                    {{ customer.contact?.name || '-' }}
                   </td>
                   <td class="p-3 text-left font-medium text-[15px]">
-                    {{ customer.customer_data.BUSINESS || '-' }}
+                    {{ customer.contact?.company || '-' }}
                   </td>
                   <td class="p-3 text-left font-medium text-[15px]">
-                    {{ customer.customer_data.PHONE ? customer.customer_data.PHONE : '-' }}
+                    {{ customer.contact?.phone || '-' }}
                   </td>
                   <td class="p-3 text-left font-medium text-[15px]">
-                    {{ customer.customer_data.STATE || '-' }}
+                    {{ customer.contact?.state || '-' }}
                   </td>
                   <td class="p-3 text-left font-medium text-[15px]">
-                    {{ formatDuration(customer.call_history.call_cost.total_duration_seconds) }}
+                    {{ formatDuration(customer?.call_cost?.total_duration_seconds) }}
                   </td>
-                  <td v-if="false" class="p-3 text-left font-medium text-[15px]">
+                  <td class="p-3 text-left font-medium text-[15px]">
                     <span
                       class="inline-flex items-center text-center h-8 px-2 text-[15px] rounded-md bg-opacity-10 capitalize"
-                      :class="callStatus(customer.call_history.call_status)"
+                      :class="callStatus(customer.call_status)"
                     >
-                      {{ customer.call_history.call_status }}
+                      {{ customer.call_status }}
                     </span>
                   </td>
-                  <td v-if="false" class="p-3 text-left font-medium text-[15px]">
+                  <td class="p-3 text-left font-medium text-[15px]">
                     <span
                       class="inline-flex items-center text-center h-8 px-2 text-[15px] rounded-md bg-[#F8F7FA]"
                     >
-                      {{ customer.call_history.disconnection_reason }}
+                      {{ customer.disconnection_reason }}
                     </span>
                   </td>
-                  <td class="p-3 text-left font-medium text-[15px]">
-                    {{ customer.call_history.length }}
-                  </td>
+                  <td class="p-3 text-left font-medium text-[15px]">1</td>
                   <td class="p-3 text-left font-medium text-[15px]">
                     <span>
                       {{
-                        customer.call_history.call_analysis.custom_analysis_data.hasOwnProperty(
+                        customer.call_analysis.custom_analysis_data?.hasOwnProperty(
                           'weekly_payments',
                         )
-                          ? customer.call_history.call_analysis.custom_analysis_data.weekly_payments
+                          ? customer.call_analysis.custom_analysis_data.weekly_payments
                           : '-'
                       }}</span
                     >
                   </td>
                   <td class="p-3 text-left font-medium text-[15px]">
                     <span
-                      v-if="
-                        customer.call_history.call_analysis.custom_analysis_data.hasOwnProperty(
-                          'has_debt',
-                        )
-                      "
+                      v-if="customer.call_analysis.custom_analysis_data?.hasOwnProperty('has_debt')"
                       class="inline-flex items-center text-center h-8 px-2 text-[15px] rounded-md bg-[#F8F7FA]"
                     >
-                      {{ customer.call_history.call_analysis.custom_analysis_data.has_debt }}</span
+                      {{ customer.call_analysis.custom_analysis_data.has_debt }}</span
                     >
                     <span v-else>-</span>
                   </td>
                   <td class="p-3 text-left font-medium text-[15px]">
                     <span>
                       {{
-                        customer.call_history.call_analysis.custom_analysis_data.hasOwnProperty(
-                          'total_debt',
-                        )
-                          ? customer.call_history.call_analysis.custom_analysis_data.total_debt
+                        customer.call_analysis.custom_analysis_data?.hasOwnProperty('total_debt')
+                          ? customer.call_analysis.custom_analysis_data.total_debt
                           : '-'
                       }}</span
                     >
@@ -415,10 +399,8 @@
                   <td class="p-3 text-left font-medium text-[15px]">
                     <span>
                       {{
-                        customer.call_history.call_analysis.custom_analysis_data.hasOwnProperty(
-                          'advances',
-                        )
-                          ? customer.call_history.call_analysis.custom_analysis_data.advances
+                        customer.call_analysis.custom_analysis_data?.hasOwnProperty('advances')
+                          ? customer.call_analysis.custom_analysis_data.advances
                           : '-'
                       }}</span
                     >
@@ -426,10 +408,8 @@
                   <td class="p-3 text-left font-medium text-[15px]">
                     <span>
                       {{
-                        customer.call_history.call_analysis.custom_analysis_data.hasOwnProperty(
-                          'disposition',
-                        )
-                          ? customer.call_history.call_analysis.custom_analysis_data.disposition
+                        customer.call_analysis.custom_analysis_data?.hasOwnProperty('disposition')
+                          ? customer.call_analysis.custom_analysis_data.disposition
                           : '-'
                       }}</span
                     >
@@ -439,7 +419,8 @@
                       class="relative flex items-center overflow-hidden border border-border-100 rounded-md"
                     >
                       <select
-                        :value="customer.customer_data.stage"
+                        :class="[customer.contact ? '' : 'pointer-events-none opacity-45']"
+                        :value="customer.contact?.stage"
                         @change="updateStage($event, customer)"
                         class="w-full h-10 outline-none px-2 appearance-none cursor-pointer text-heading-100"
                       >
@@ -458,7 +439,7 @@
                   <td class="p-3 text-left font-medium text-[15px]">
                     <div class="flex items-center gap-2">
                       <span
-                        v-if="customer.call_history?.transcript"
+                        v-if="customer?.transcript"
                         @click="showTranscriptPreviewModal(customer)"
                         class="cursor-pointer transition-colors duration-150 hover:text-info-100"
                         title="Show Transcript"
@@ -466,6 +447,7 @@
                         <View :size="20" :stroke-width="1.75" />
                       </span>
                       <span
+                        v-if="customer.contact?.notes"
                         @click="showUpdateNoteModal(customer)"
                         class="cursor-pointer transition-colors duration-150 hover:text-success-100"
                         title="Update Note"
@@ -477,148 +459,66 @@
                 </tr>
                 <tr v-if="expandedRowId === index">
                   <td colspan="17" class="bg-[#F8F7FA] p-4">
-                    <div class="grid grid-cols-3 gap-4">
-                      <div class="bg-white-100 border border-border-100 rounded-md">
+                    <div class="flex gap-4">
+                      <div
+                        v-if="customer.contact"
+                        class="bg-white-100 border border-border-100 rounded-md flex-1"
+                      >
                         <div class="border-b border-border-100 p-4">
                           <h3 class="font-semibold text-heading-100">Business Details</h3>
                         </div>
                         <div class="p-4 grid gap-2">
-                          <p v-if="customer.customer_data.lead_source">
+                          <p v-if="customer.contact?.lead_source">
                             <span class="font-medium text-heading-100">Lead Source</span>:
-                            {{ customer.customer_data.lead_source }}
+                            {{ customer.contact.lead_source }}
                           </p>
-                          <p v-if="customer.customer_data.added_data">
-                            <span class="font-medium text-heading-100">Date Contact Added</span>:
-                            {{ formatDate(customer.customer_data.added_data) }}
-                          </p>
-                          <p v-if="customer.customer_data.OWNER">
+                          <p v-if="customer.contact?.name">
                             <span class="font-medium text-heading-100">Contact Name</span>:
-                            {{ customer.customer_data.OWNER }}
+                            {{ customer.contact.name }}
                           </p>
-                          <p v-if="customer.customer_data.BUSINESS">
+                          <p v-if="customer.contact?.company">
                             <span class="font-medium text-heading-100">Business Name</span>:
-                            {{ customer.customer_data.BUSINESS }}
+                            {{ customer.contact.company }}
                           </p>
-                          <p v-if="customer.customer_data.CITY">
-                            <span class="font-medium text-heading-100">City</span>:
-                            {{ customer.customer_data.CITY }}
-                          </p>
-                          <p v-if="customer.customer_data.STATE">
+                          <p v-if="customer.contact?.state">
                             <span class="font-medium text-heading-100">State</span>:
-                            {{ customer.customer_data.STATE }}
+                            {{ customer.contact.state }}
                           </p>
-                          <p v-if="customer.customer_data.EMAIL">
+                          <p v-if="customer.contact?.email">
                             <span class="font-medium text-heading-100">Email</span>:
-                            {{ customer.customer_data.EMAIL }}
+                            {{ customer.contact.email }}
                           </p>
                         </div>
                       </div>
-                      <div class="bg-white-100 border border-border-100 rounded-md">
+                      <div class="bg-white-100 border border-border-100 rounded-md flex-1">
                         <div class="border-b border-border-100 p-4">
                           <h3 class="font-semibold text-heading-100">Call Details</h3>
                         </div>
                         <div class="p-4 grid gap-2">
                           <p>
                             <span class="font-medium text-heading-100">Call ID</span>:
-                            {{ customer.call_history.call_id }}
+                            {{ customer.call_id }}
                           </p>
-                          <p v-if="customer.call_history.disconnection_reason">
+                          <p v-if="customer.disconnection_reason">
                             <span class="font-medium text-heading-100">Disconnection Reason</span>:
-                            {{ customer.call_history.disconnection_reason }}
+                            {{ customer.disconnection_reason }}
                           </p>
-                          <p v-if="customer.call_history.call_analysis?.user_sentiment">
+                          <p v-if="customer.call_analysis?.user_sentiment">
                             <span class="font-medium text-heading-100">User Sentiment</span>:
-                            {{ customer.call_history.call_analysis.user_sentiment }}
+                            {{ customer.call_analysis.user_sentiment }}
                           </p>
                           <p>
                             <span class="font-medium text-heading-100">Call From</span>:
-                            {{ customer.call_history.from_number }}
+                            {{ customer.from_number }}
                           </p>
                           <p>
                             <span class="font-medium text-heading-100">Call To</span>:
-                            {{ customer.call_history.to_number }}
+                            {{ customer.to_number }}
                           </p>
-                          <p v-if="customer.call_history.llm_latency">
+                          <p v-if="customer.llm_latency">
                             <span class="font-medium text-heading-100">End to End Latency</span>:
-                            {{ customer.call_history.llm_latency.max }} ms
+                            {{ customer.llm_latency.max }} ms
                           </p>
-                        </div>
-                      </div>
-                      <div class="bg-white-100 border border-border-100 rounded-md">
-                        <div class="border-b border-border-100 p-4">
-                          <h3 class="font-semibold text-heading-100">Position Details</h3>
-                        </div>
-                        <div class="p-4 grid gap-4">
-                          <div v-if="customer.customer_data['POSITIONS']" class="grid gap-2">
-                            <p>
-                              <span class="font-medium text-heading-100">Position 1</span>:
-                              {{ customer.customer_data['POSITIONS'] }}
-                            </p>
-                            <p v-if="customer.customer_data['POSITIONS INFO']">
-                              <span class="font-medium text-heading-100">Info</span>:
-                              {{ customer.customer_data['POSITIONS INFO'] }}
-                            </p>
-                            <p v-if="customer.customer_data['FREQUENCY']">
-                              <span class="font-medium text-heading-100">Frequency</span>:
-                              {{ customer.customer_data['FREQUENCY'] }}
-                            </p>
-                          </div>
-                          <div v-if="customer.customer_data['POSITIONS 2']" class="grid gap-2">
-                            <p>
-                              <span class="font-medium text-heading-100">Position 2</span>:
-                              {{ customer.customer_data['POSITIONS 2'] }}
-                            </p>
-                            <p v-if="customer.customer_data['POSITIONS INFO 2']">
-                              <span class="font-medium text-heading-100">Info</span>:
-                              {{ customer.customer_data['POSITIONS INFO 2'] }}
-                            </p>
-                            <p v-if="customer.customer_data['FREQUENCY 2']">
-                              <span class="font-medium text-heading-100">Frequency</span>:
-                              {{ customer.customer_data['FREQUENCY 2'] }}
-                            </p>
-                          </div>
-                          <div v-if="customer.customer_data['POSITIONS 3']" class="grid gap-2">
-                            <p>
-                              <span class="font-medium text-heading-100">Position 3</span>:
-                              {{ customer.customer_data['POSITIONS 3'] }}
-                            </p>
-                            <p v-if="customer.customer_data['POSITIONS INFO 3']">
-                              <span class="font-medium text-heading-100">Info</span>:
-                              {{ customer.customer_data['POSITIONS INFO 3'] }}
-                            </p>
-                            <p v-if="customer.customer_data['FREQUENCY 3']">
-                              <span class="font-medium text-heading-100">Frequency</span>:
-                              {{ customer.customer_data['FREQUENCY 3'] }}
-                            </p>
-                          </div>
-                          <div v-if="customer.customer_data['POSITIONS 4']" class="grid gap-2">
-                            <p>
-                              <span class="font-medium text-heading-100">Position 4</span>:
-                              {{ customer.customer_data['POSITIONS 4'] }}
-                            </p>
-                            <p v-if="customer.customer_data['POSITIONS INFO 4']">
-                              <span class="font-medium text-heading-100">Info</span>:
-                              {{ customer.customer_data['POSITIONS INFO 4'] }}
-                            </p>
-                            <p v-if="customer.customer_data['FREQUENCY 4']">
-                              <span class="font-medium text-heading-100">Frequency</span>:
-                              {{ customer.customer_data['FREQUENCY 4'] }}
-                            </p>
-                          </div>
-                          <div v-if="customer.customer_data['POSITIONS 5']" class="grid gap-2">
-                            <p>
-                              <span class="font-medium text-heading-100">Position 5</span>:
-                              {{ customer.customer_data['POSITIONS 5'] }}
-                            </p>
-                            <p v-if="customer.customer_data['POSITIONS INFO 5']">
-                              <span class="font-medium text-heading-100">Info</span>:
-                              {{ customer.customer_data['POSITIONS INFO 5'] }}
-                            </p>
-                            <p v-if="customer.customer_data['FREQUENCY 5']">
-                              <span class="font-medium text-heading-100">Frequency</span>:
-                              {{ customer.customer_data['FREQUENCY 5'] }}
-                            </p>
-                          </div>
                         </div>
                       </div>
                     </div>
@@ -690,7 +590,7 @@
           <div class="flex items-center px-4 py-3 justify-between">
             <nav class="flex items-center gap-2">
               <button
-                :class="[currentPage === 0 ? 'pointer-events-none opacity-50' : '']"
+                :class="[currentPage === 1 ? 'pointer-events-none opacity-50' : '']"
                 class="flex items-center gap-2 h-11 px-4 bg-primary-100 text-white-100 rounded-md leading-none transition-all duration-150 hover:brightness-125 font-medium"
                 @click="loadCustomers('prev')"
               >
@@ -698,6 +598,11 @@
                 Previous
               </button>
               <button
+                :class="[
+                  currentPage === this.customers.pagination.totalPages
+                    ? 'pointer-events-none opacity-50'
+                    : '',
+                ]"
                 class="flex items-center gap-2 h-11 px-4 bg-primary-100 text-white-100 rounded-md leading-none transition-all duration-150 hover:brightness-125 font-medium"
                 @click="loadCustomers('next')"
               >
@@ -710,7 +615,7 @@
       </div>
     </div>
     <div
-      v-if="updateNoteModal && updateNoteModal.id === currentCustomerToHanlde.customer_data._id"
+      v-if="updateNoteModal && updateNoteModal.id === currentCustomerToHanlde._id"
       class="bg-opacity-40 fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-heading-100"
     >
       <div class="max-w-2xl rounded-xl w-full mx-auto bg-white-100">
@@ -728,7 +633,7 @@
             <textarea
               class="w-full border border-border-100 rounded-md px-4 py-3 outline-none"
               placeholder="Notes..."
-              v-model="currentCustomerToHanlde.customer_data.notes"
+              v-model="currentCustomerToHanlde.contact.notes"
               rows="2"
             ></textarea>
           </div>
@@ -752,9 +657,7 @@
       </div>
     </div>
     <div
-      v-if="
-        showTranscriptModal && showTranscriptModal.id === currentCustomerToHanlde.customer_data._id
-      "
+      v-if="showTranscriptModal && showTranscriptModal.id === currentCustomerToHanlde._id"
       class="bg-opacity-40 fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-heading-100"
     >
       <div class="max-w-2xl rounded-xl w-full mx-auto bg-white-100">
@@ -771,7 +674,7 @@
           <div class="p-4 bg-[#F8F7FA] border border-border-100 rounded-md">
             <div
               class="text-heading-100 grid gap-1"
-              v-html="formattedTranscript(currentCustomerToHanlde.call_history.transcript)"
+              v-html="formattedTranscript(currentCustomerToHanlde.transcript)"
             ></div>
           </div>
         </div>
@@ -1012,9 +915,19 @@ export default {
       updateNoteModal: null,
       showTranscriptModal: null,
       currentCustomerToHanlde: {},
-      customers: [],
-      allCustomers: [],
-      currentPage: 0,
+      customers: {
+        data: [],
+        pagination: {
+          totalPages: 0,
+        },
+      },
+      allCustomers: {
+        data: [],
+        pagination: {
+          totalRecords: 0,
+        },
+      },
+      currentPage: 1,
       isLoading: false,
       dispositionFilter: [
         'Has Debt and Interested',
@@ -1025,6 +938,14 @@ export default {
         '(DNC) Do Not Call List',
         'Please Remove',
         'Uncertain',
+      ],
+      disconnectionReasonFilter: [
+        'user_hangup',
+        'agent_hangup',
+        'call_transfer',
+        'voicemail_reached',
+        'inactivity',
+        'machine_detected',
       ],
       hasDebtFilter: [true, false],
       moreFilters: false,
@@ -1078,15 +999,14 @@ export default {
         } else if (page === 'prev') {
           this.currentPage -= 1
         } else {
-          this.currentPage = 0
+          this.currentPage = 1
         }
         let queries = {
-          date_range: this.currentPediod.value,
-          skip: this.currentPage,
-          limit: 30,
+          page: this.currentPage,
+          limit: 20,
         }
         queries = new URLSearchParams(queries).toString()
-        const { data } = await ApiRequest().get(`/merged-data?${queries}`)
+        const { data } = await ApiRequest().get(`/call-history/get?${queries}`)
         this.customers = data.data
       } catch (e) {
         console.log(e)
@@ -1097,6 +1017,12 @@ export default {
     async loadAllCustomers() {
       this.isLoading = true
       try {
+        let queries = {
+          limit: 100,
+        }
+        queries = new URLSearchParams(queries).toString()
+        const { data } = await ApiRequest().get(`/call-history/get?${queries}`)
+        this.allCustomers = data.data
       } catch (e) {
         console.log(e)
       } finally {
@@ -1107,21 +1033,21 @@ export default {
       this.expandedRowId = this.expandedRowId === id ? null : id
     },
     updateStage(event, customer) {
-      this.updateNotesOrStage('stage', customer.customer_data._id, event.target.value)
+      this.updateNotesOrStage('stage', customer.contact._id, event.target.value)
     },
     updateNotes(customer) {
-      this.updateNotesOrStage('notes', customer.customer_data._id, customer.customer_data.notes)
+      this.updateNotesOrStage('notes', customer.contact._id, customer.contact.notes)
     },
     showUpdateNoteModal(customer) {
       this.currentCustomerToHanlde = customer
       this.updateNoteModal = {
-        id: customer.customer_data._id,
+        id: customer.contact._id,
       }
     },
     showTranscriptPreviewModal(customer) {
       this.currentCustomerToHanlde = customer
       this.showTranscriptModal = {
-        id: customer.customer_data._id,
+        id: customer._id,
       }
     },
     closeUpdateNoteModal() {
@@ -1181,41 +1107,34 @@ export default {
       csv.push(headers.join(','))
       this.filteredCustomers.forEach((customer) => {
         const row = {
-          dateTime: this.formatDate(customer.call_history?.start_timestamp),
-          name: customer.customer_data.OWNER || '-',
-          business: customer.customer_data.BUSINESS || '-',
-          phone: customer.customer_data.PHONE || '-',
-          state: customer.customer_data.STATE || '-',
-          duration: this.formatDuration(customer.call_history.call_cost.total_duration_seconds),
-          callCount: customer.call_history.length,
-          weeklyPayments: customer.call_history.call_analysis.custom_analysis_data.hasOwnProperty(
+          dateTime: this.formatDate(customer.start_timestamp),
+          name: customer?.contact?.name || '-',
+          business: customer?.contact?.company || '-',
+          phone: customer?.contact?.phone || '-',
+          state: customer?.contact?.state || '-',
+          duration: this.formatDuration(customer.call_cost.total_duration_seconds),
+          callCount: 1,
+          weeklyPayments: customer?.call_analysis.custom_analysis_data?.hasOwnProperty(
             'weekly_payments',
           )
-            ? customer.call_history.call_analysis.custom_analysis_data.weekly_payments
+            ? customer.call_analysis.custom_analysis_data.weekly_payments
             : '-',
-          hasDebt: customer.call_history.call_analysis.custom_analysis_data.hasOwnProperty(
-            'has_debt',
-          )
-            ? customer.call_history.call_analysis.custom_analysis_data.has_debt
+          hasDebt: customer?.call_analysis.custom_analysis_data?.hasOwnProperty('has_debt')
+            ? customer.call_analysis.custom_analysis_data.has_debt
             : '-',
-          TotalDebt: customer.call_history.call_analysis.custom_analysis_data.hasOwnProperty(
-            'total_debt',
-          )
-            ? customer.call_history.call_analysis.custom_analysis_data.total_debt
+          TotalDebt: customer?.call_analysis.custom_analysis_data?.hasOwnProperty('total_debt')
+            ? customer.call_analysis.custom_analysis_data.total_debt
             : '-',
-          TotalDebt: customer.call_history.call_analysis.custom_analysis_data.hasOwnProperty(
-            'advances',
-          )
-            ? customer.call_history.call_analysis.custom_analysis_data.advances
+          TotalDebt: customer?.call_analysis.custom_analysis_data?.hasOwnProperty('advances')
+            ? customer.call_analysis.custom_analysis_data.advances
             : '-',
-          Disposition: customer.call_history.call_analysis.custom_analysis_data.hasOwnProperty(
-            'disposition',
-          )
-            ? customer.call_history.call_analysis.custom_analysis_data.disposition
+          Disposition: customer?.call_analysis.custom_analysis_data?.hasOwnProperty('disposition')
+            ? customer.call_analysis.custom_analysis_data.disposition
             : '-',
-          Stage: customer.customer_data.stage
-            ? this.stages.find((s) => s.key === customer.customer_data.stage).value
-            : '-',
+          Stage: '-',
+          // Stage: customer?.contact?.stage
+          //   ? this.stages.find((s) => s.key === customer.contact.stage).value
+          //   : '-',
         }
         csv.push(Object.values(row).join(','))
       })
@@ -1314,7 +1233,7 @@ export default {
           file: this.upload.selectedCSV,
           lead_source: this.upload.leadSource,
         }
-        const { data } = await ApiRequest().post(`/upload-csv`, payload, {
+        const { data } = await ApiRequest().post(`/upload/`, payload, {
           headers: {
             'Content-Type': 'multipart/form-data',
           },
@@ -1336,40 +1255,41 @@ export default {
   },
   computed: {
     filteredCustomers() {
-      return this.customers.filter((customer) => {
+      return this.customers.data.filter((customer) => {
         // Disposition filter
         const dispositionMatch =
           !this.selectedDisposition ||
-          customer.call_history.call_analysis.custom_analysis_data.disposition ===
-            this.selectedDisposition
+          (customer.call_analysis?.custom_analysis_data?.hasOwnProperty('disposition') &&
+            customer.call_analysis.custom_analysis_data.disposition === this.selectedDisposition)
 
         // States filter
-        const stateMatch =
-          !this.selectedState || customer.customer_data.STATE === this.selectedState
+        const stateMatch = !this.selectedState || customer.contact.state === this.selectedState
 
         // Has Debt filter
         const hasDebtMatch =
           !this.selectedDebt ||
-          customer.call_history.call_analysis.custom_analysis_data.has_debt === this.selectedDebt
+          (customer.call_analysis?.custom_analysis_data?.hasOwnProperty('has_debt') &&
+            customer.call_analysis.custom_analysis_data.has_debt === this.selectedDebt)
 
         // Stage filter
         const stageMatch =
-          this.selectedStage === '-1' || customer.customer_data.stage === this.selectedStage
+          this.selectedStage === '-1' || customer.contact.stage === this.selectedStage
 
         // Debt Amount filter
         const debtAmountMatch =
           !this.debtAmount ||
-          customer.call_history.call_analysis.custom_analysis_data.total_debt === this.debtAmount
+          (customer.call_analysis?.custom_analysis_data?.hasOwnProperty('total_debt') &&
+            customer.call_analysis.custom_analysis_data.total_debt === this.debtAmount)
 
         // Payemnt filter
         const paymentMatch =
           !this.selectedPayment ||
-          customer.call_history.call_analysis.custom_analysis_data.weekly_payments ===
-            this.selectedPayment
+          (customer.call_analysis?.custom_analysis_data?.hasOwnProperty('weekly_payments') &&
+            customer.call_analysis.custom_analysis_data.weekly_payments === this.selectedPayment)
 
         // Lead Sourcce filter
         const leadSourceMatch =
-          !this.selectedLeadSource || customer.customer_data.lead_source === this.selectedLeadSource
+          !this.selectedLeadSource || customer.contact.lead_source === this.selectedLeadSource
 
         // Combine all filters
         return (
@@ -1384,11 +1304,11 @@ export default {
       })
     },
     totalCalls() {
-      return this.allCustomers.filter((customer) => customer.call_history.length > 0).length
+      return this.allCustomers.data.length
     },
     connectedCalls() {
-      return this.allCustomers.filter((customer) => {
-        return customer.call_history.every((call) => call.call_analysis?.call_successful)
+      return this.allCustomers.data.filter((customer) => {
+        return this.disconnectionReasonFilter.includes(customer.disconnection_reason)
       }).length
     },
   },
