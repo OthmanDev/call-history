@@ -1233,7 +1233,7 @@ export default {
           file: this.upload.selectedCSV,
           lead_source: this.upload.leadSource,
         }
-        const { data } = await ApiRequest().post(`/upload/`, payload, {
+        const { data } = await ApiRequest().post(`/upload/admin1`, payload, {
           headers: {
             'Content-Type': 'multipart/form-data',
           },
