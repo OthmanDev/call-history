@@ -38,18 +38,18 @@
                 >Yesterday</span
               >
               <span
-                @click="getCustomersByPeriod('last_3_days')"
+                @click="getCustomersByPeriod('last_three_days')"
                 class="cursor-pointer text-[15px]"
                 :class="[
-                  currentPediod.value === 'last_3_days' ? 'text-primary-100 font-medium' : '',
+                  currentPediod.value === 'last_three_days' ? 'text-primary-100 font-medium' : '',
                 ]"
                 >Last 3 days</span
               >
               <span
-                @click="getCustomersByPeriod('last_7_days')"
+                @click="getCustomersByPeriod('last_seven_days')"
                 class="cursor-pointer text-[15px]"
                 :class="[
-                  currentPediod.value === 'last_7_days' ? 'text-primary-100 font-medium' : '',
+                  currentPediod.value === 'last_seven_days' ? 'text-primary-100 font-medium' : '',
                 ]"
                 >Last 7 days</span
               >
@@ -95,7 +95,7 @@
             <span class="text-xl font-bold text-heading-100">Customers</span>
             <div class="flex items-center gap-2">
               <button
-                :class="[customers.length === 0 ? 'pointer-events-none opacity-50' : '']"
+                :class="[customers.data.length === 0 ? 'pointer-events-none opacity-50' : '']"
                 @click="moreFilters = !moreFilters"
                 class="flex items-center h-11 gap-5 px-4 bg-primary-100 text-white-100 rounded-md leading-none transition-all duration-150 hover:brightness-125 font-medium"
               >
@@ -110,7 +110,7 @@
                 />
               </button>
               <button
-                :class="[customers.length === 0 ? 'pointer-events-none opacity-50' : '']"
+                :class="[filteredCustomers.length === 0 ? 'pointer-events-none opacity-50' : '']"
                 @click="exportCSV"
                 class="flex items-center gap-2 h-11 px-4 bg-primary-100 text-white-100 rounded-md leading-none transition-all duration-150 hover:brightness-125 font-medium"
               >
@@ -175,7 +175,10 @@
                 <X :size="10" :stroke-width="2" />
               </span>
             </div>
-            <div class="relative flex items-center border border-border-100 rounded-md flex-1">
+            <div
+              v-if="false"
+              class="relative flex items-center border border-border-100 rounded-md flex-1"
+            >
               <input
                 v-model="selectedLeadSource"
                 type="text"
@@ -190,7 +193,10 @@
                 <X :size="10" :stroke-width="2" />
               </span>
             </div>
-            <div class="relative flex items-center border border-border-100 rounded-md flex-1">
+            <div
+              v-if="false"
+              class="relative flex items-center border border-border-100 rounded-md flex-1"
+            >
               <select
                 v-model="selectedStage"
                 class="w-full h-11 outline-none px-4 appearance-none cursor-pointer text-heading-100 rounded-md"
@@ -213,7 +219,10 @@
                 <X :size="10" :stroke-width="2" />
               </span>
             </div>
-            <div class="relative flex items-center border border-border-100 rounded-md flex-1">
+            <div
+              v-if="false"
+              class="relative flex items-center border border-border-100 rounded-md flex-1"
+            >
               <input
                 v-model="selectedState"
                 type="text"
@@ -261,7 +270,7 @@
           </div>
         </div>
         <div class="max-w-full overflow-x-auto without-scrollbar">
-          <table v-if="filteredCustomers.length > 0" class="w-full">
+          <table v-if="filteredCustomersPaginated.length > 0" class="w-full">
             <thead>
               <tr class="bg-[#F8F7FA] border-b border-border-100">
                 <th
@@ -318,7 +327,7 @@
               </tr>
             </thead>
             <tbody class="divide-y divide-border-100">
-              <template v-for="(customer, index) in filteredCustomers" :key="index">
+              <template v-for="(customer, index) in filteredCustomersPaginated" :key="index">
                 <tr>
                   <td class="p-3 text-left font-medium text-[15px]">
                     <button @click="toggleExpandedRow(index)" class="mt-1.5">
@@ -528,7 +537,7 @@
             </tbody>
           </table>
           <div
-            v-if="!isLoading && filteredCustomers.length === 0"
+            v-if="!isLoading && filteredCustomersPaginated.length === 0"
             class="h-[300px] flex items-center justify-center flex-col text-center"
           >
             <div class="w-[180px] mb-3">
@@ -590,21 +599,17 @@
           <div class="flex items-center px-4 py-3 justify-between">
             <nav class="flex items-center gap-2">
               <button
-                :class="[currentPage === 1 ? 'pointer-events-none opacity-50' : '']"
+                :class="[currentPage === 0 ? 'pointer-events-none opacity-50' : '']"
                 class="flex items-center gap-2 h-11 px-4 bg-primary-100 text-white-100 rounded-md leading-none transition-all duration-150 hover:brightness-125 font-medium"
-                @click="loadCustomers('prev')"
+                @click="prevPage"
               >
                 <ArrowLeft :size="18" :stroke-width="1.75" class="mt-[2px]" />
                 Previous
               </button>
               <button
-                :class="[
-                  currentPage === this.customers.pagination.totalPages
-                    ? 'pointer-events-none opacity-50'
-                    : '',
-                ]"
+                :class="[currentPage === totalPages - 1 ? 'pointer-events-none opacity-50' : '']"
                 class="flex items-center gap-2 h-11 px-4 bg-primary-100 text-white-100 rounded-md leading-none transition-all duration-150 hover:brightness-125 font-medium"
-                @click="loadCustomers('next')"
+                @click="nextPage"
               >
                 Next
                 <ArrowRight :size="18" :stroke-width="1.75" class="mt-[2px]" />
@@ -917,17 +922,9 @@ export default {
       currentCustomerToHanlde: {},
       customers: {
         data: [],
-        pagination: {
-          totalPages: 0,
-        },
       },
-      allCustomers: {
-        data: [],
-        pagination: {
-          totalRecords: 0,
-        },
-      },
-      currentPage: 1,
+      totalRecords: 0,
+      currentPage: 0,
       isLoading: false,
       dispositionFilter: [
         'Has Debt and Interested',
@@ -987,27 +984,19 @@ export default {
     }
   },
   mounted() {
-    this.loadCustomers(this.currentPage)
+    this.loadCustomers()
   },
   methods: {
-    async loadCustomers(page) {
+    async loadCustomers() {
       this.isLoading = true
       try {
-        if (page === 'next') {
-          this.currentPage += 1
-        } else if (page === 'prev') {
-          this.currentPage -= 1
-        } else {
-          this.currentPage = 1
-        }
         let queries = {
-          page: this.currentPage,
-          limit: 20,
           period: this.currentPediod.value,
         }
         queries = new URLSearchParams(queries).toString()
         const { data } = await ApiRequest().get(`/call-history/get?${queries}`)
         this.customers = data.data
+        this.totalRecords = data.data.totalRecords
       } catch (e) {
         console.log(e)
       } finally {
@@ -1070,7 +1059,8 @@ export default {
     getCustomersByPeriod(period) {
       this.isActivePeriod = false
       this.currentPediod = this.periods.find((p) => p.value === period)
-      this.loadCustomers(this.currentPage)
+      this.currentPage = 0
+      this.loadCustomers()
     },
     exportCSV() {
       const headers = [
@@ -1172,7 +1162,7 @@ export default {
               type: 'success',
             }
           }
-          this.loadCustomers(this.currentPage)
+          this.loadCustomers()
         }
       } catch (e) {
         console.log(e)
@@ -1238,8 +1228,71 @@ export default {
         this.isLoading = false
       }
     },
+    prevPage() {
+      if (this.currentPage > 0) {
+        this.currentPage--
+      }
+    },
+    nextPage() {
+      if (this.currentPage < this.totalPages - 1) {
+        this.currentPage++
+      }
+    },
   },
   computed: {
+    filteredCustomersPaginated() {
+      const items = this.customers.data.filter((customer) => {
+        // Disposition filter
+        const dispositionMatch =
+          !this.selectedDisposition ||
+          (customer.call_analysis?.custom_analysis_data?.hasOwnProperty('disposition') &&
+            customer.call_analysis.custom_analysis_data.disposition === this.selectedDisposition)
+
+        // States filter
+        const stateMatch = !this.selectedState || customer.contact.state === this.selectedState
+
+        // Has Debt filter
+        const hasDebtMatch =
+          !this.selectedDebt ||
+          (customer.call_analysis?.custom_analysis_data?.hasOwnProperty('has_debt') &&
+            customer.call_analysis.custom_analysis_data.has_debt === this.selectedDebt)
+
+        // Stage filter
+        const stageMatch =
+          this.selectedStage === '-1' || customer.contact.stage === this.selectedStage
+
+        // Debt Amount filter
+        const debtAmountMatch =
+          !this.debtAmount ||
+          (customer.call_analysis?.custom_analysis_data?.hasOwnProperty('total_debt') &&
+            customer.call_analysis.custom_analysis_data.total_debt === this.debtAmount)
+
+        // Payemnt filter
+        const paymentMatch =
+          !this.selectedPayment ||
+          (customer.call_analysis?.custom_analysis_data?.hasOwnProperty('weekly_payments') &&
+            customer.call_analysis.custom_analysis_data.weekly_payments === this.selectedPayment)
+
+        // Lead Sourcce filter
+        const leadSourceMatch =
+          !this.selectedLeadSource || customer.contact.lead_source === this.selectedLeadSource
+
+        // Combine all filters
+        return (
+          dispositionMatch &&
+          stateMatch &&
+          hasDebtMatch &&
+          stageMatch &&
+          debtAmountMatch &&
+          paymentMatch &&
+          leadSourceMatch
+        )
+      })
+      this.totalRecords = items.length
+      const start = this.currentPage * 20
+      const end = start + 20
+      return items.slice(start, end)
+    },
     filteredCustomers() {
       return this.customers.data.filter((customer) => {
         // Disposition filter
@@ -1296,6 +1349,9 @@ export default {
       return this.customers.data.filter((customer) => {
         return this.disconnectionReasonFilter.includes(customer.disconnection_reason)
       }).length
+    },
+    totalPages() {
+      return Math.ceil(this.totalRecords / 20)
     },
   },
 }
