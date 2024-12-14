@@ -987,7 +987,6 @@ export default {
     }
   },
   mounted() {
-    this.loadAllCustomers()
     this.loadCustomers(this.currentPage)
   },
   methods: {
@@ -1004,25 +1003,11 @@ export default {
         let queries = {
           page: this.currentPage,
           limit: 20,
+          period: this.currentPediod.value,
         }
         queries = new URLSearchParams(queries).toString()
         const { data } = await ApiRequest().get(`/call-history/get?${queries}`)
         this.customers = data.data
-      } catch (e) {
-        console.log(e)
-      } finally {
-        this.isLoading = false
-      }
-    },
-    async loadAllCustomers() {
-      this.isLoading = true
-      try {
-        let queries = {
-          limit: 100,
-        }
-        queries = new URLSearchParams(queries).toString()
-        const { data } = await ApiRequest().get(`/call-history/get?${queries}`)
-        this.allCustomers = data.data
       } catch (e) {
         console.log(e)
       } finally {
@@ -1305,10 +1290,10 @@ export default {
       })
     },
     totalCalls() {
-      return this.allCustomers.data.length
+      return this.customers.data.length
     },
     connectedCalls() {
-      return this.allCustomers.data.filter((customer) => {
+      return this.customers.data.filter((customer) => {
         return this.disconnectionReasonFilter.includes(customer.disconnection_reason)
       }).length
     },
