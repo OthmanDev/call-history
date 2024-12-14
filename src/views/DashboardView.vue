@@ -1241,8 +1241,9 @@ export default {
         if (data) {
           this.toast = {
             active: true,
-            message: data.message,
-            type: 'success',
+            message:
+              data.data === 'No valid contacts found in the upload' ? data.data : data.message,
+            type: data.data === 'No valid contacts found in the upload' ? 'error' : 'success',
           }
           this.closeUploadContactsModal()
         }
