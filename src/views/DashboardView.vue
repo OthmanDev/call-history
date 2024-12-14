@@ -965,11 +965,11 @@ export default {
         },
         {
           label: 'Last 3 days',
-          value: 'last_3_days',
+          value: 'last_three_days',
         },
         {
           label: 'Last 7 days',
-          value: 'last_7_days',
+          value: 'last_seven_days',
         },
       ],
       selectedDisposition: '',
