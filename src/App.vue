@@ -6,7 +6,7 @@
       :class="[isCollapsed ? 'xl:left-0' : 'xl:-left-[260px]']"
     >
       <div class="h-[60px] flex items-center justify-between px-6">
-        <RouterLink to="dashboard">Calls History</RouterLink>
+        <RouterLink to="/">Calls History</RouterLink>
         <span class="cursor-pointer text-heading-100 sm:flex hidden" @click="closeSidebar">
           <menu-left-icon class="w-[23px] h-[23px]" />
         </span>
