@@ -91,7 +91,7 @@
                         <div class="flex items-start justify-between">
                           <div class="flex-1">
                             <div class="flex items-center gap-2">
-                              <ShieldCheck :size="22" class="text-success-100" />
+                              <ShieldCheck :size="22" class="text-info-100" />
                               <h4 class="font-medium">Verified Phone Number</h4>
                             </div>
                             <p class="text-sm mt-1">
@@ -100,7 +100,7 @@
                             </p>
                           </div>
                           <button
-                            class="flex items-center gap-2 h-10 px-3 text-white-100 rounded-md leading-none transition-all duration-150 hover:brightness-125 font-medium"
+                            class="flex items-center gap-2 h-9 text-sm px-2 text-white-100 rounded-md leading-none transition-all duration-150 hover:brightness-125 font-medium"
                             :class="[number.isVerified ? 'bg-success-100' : 'bg-primary-100']"
                             @click="toggleVerification(number)"
                           >
@@ -114,7 +114,7 @@
                         <div class="flex items-start justify-between">
                           <div class="flex-1">
                             <div class="flex items-center gap-2">
-                              <Building :size="22" class="text-success-100" />
+                              <Building :size="22" class="text-info-100" />
                               <h4 class="font-medium">Branded Call</h4>
                             </div>
                             <p class="text-sm mt-1">
@@ -123,7 +123,7 @@
                             </p>
                           </div>
                           <button
-                            class="flex items-center gap-2 h-10 px-3 text-white-100 rounded-md leading-none transition-all duration-150 hover:brightness-125 font-medium"
+                            class="flex items-center gap-2 h-9 text-sm px-2 text-white-100 rounded-md leading-none transition-all duration-150 hover:brightness-125 font-medium"
                             :class="[number.hasBrandedCalls ? 'bg-success-100' : 'bg-primary-100']"
                             @click="toggleBrandedCalls(number)"
                           >
