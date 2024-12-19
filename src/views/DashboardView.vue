@@ -1,4 +1,5 @@
 <template>
+  <Topbar :title="'Dashboard'"></Topbar>
   <main class="min-h-screen">
     <div class="p-6 flex flex-col gap-6">
       <div class="flex items-center justify-between">
@@ -92,7 +93,7 @@
       <div class="rounded-xl bg-white-100 border border-border-100 overflow-hidden">
         <div class="border-b border-border-100 p-4">
           <div class="flex items-center justify-between">
-            <span class="text-xl font-bold text-heading-100">Customers</span>
+            <span class="text-lg font-bold text-heading-100">Customers</span>
             <div class="flex items-center gap-2">
               <button
                 :class="[customers.data.length === 0 ? 'pointer-events-none opacity-50' : '']"
@@ -592,10 +593,7 @@
             >
           </div>
         </div>
-        <div
-          class="border-t-4 rounded-bl-xl rounded-br-xl"
-          :class="mode === 'dark' ? 'bg-dark-70 border-dark-50' : 'bg-white-100'"
-        >
+        <div class="border-t-4 rounded-bl-xl rounded-br-xl bg-white-100 border-border-100">
           <div class="flex items-center px-4 py-3 justify-between">
             <nav class="flex items-center gap-2">
               <button
@@ -862,6 +860,7 @@ import {
   ArrowLeft,
   Trash2,
 } from 'lucide-vue-next'
+import Topbar from '@/components/Topbar.vue'
 import ApiRequest from '@/libs/ApiRequest'
 import moment from 'moment'
 
@@ -882,6 +881,7 @@ export default {
     ArrowRight,
     ArrowLeft,
     Trash2,
+    Topbar,
   },
   data() {
     return {

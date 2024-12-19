@@ -6,6 +6,18 @@ body {
   @apply font-main leading-[1.25] antialiased text-[#484848];
 }
 
+.without-scrollbar::-webkit-scrollbar,
+body::-webkit-scrollbar,
+html::-webkit-scrollbar {
+  display: none;
+}
+.without-scrollbar,
+body,
+html {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
 @keyframes spin {
   0% {
     transform: rotate(0deg);
@@ -43,4 +55,28 @@ body {
 }
 .switcher input:checked + label:after {
   left: calc(44px - 22px);
+}
+
+.checkbox {
+  @apply flex items-center gap-2 relative;
+}
+.checkbox input {
+  @apply hidden;
+}
+.checkbox label {
+  @apply inline-flex items-center gap-2 cursor-pointer;
+}
+.checkbox label:before {
+  content: '';
+  @apply w-5 h-5 bg-border-100 block rounded;
+}
+.checkbox input:checked + label:before {
+  @apply bg-primary-100;
+}
+.checkbox input:disabled + label:before {
+  @apply bg-opacity-50;
+}
+.checkbox input:checked + label svg,
+.checkbox input:disabled + label svg {
+  @apply !block;
 }
