@@ -48,6 +48,18 @@
             </button>
           </div>
           <div class="p-4 grid gap-4">
+            <div class="grid grid-cols-3 gap-4">
+              <div
+                v-for="stat in statsCards"
+                :key="stat.title"
+                class="border border-border-100 rounded-xl bg-white-100 p-4"
+              >
+                <div class="text-2xl font-bold text-heading-100 mb-1 uppercase">
+                  {{ stat.value }}
+                </div>
+                <div class="text-[17px] capitalize">{{ stat.title }}</div>
+              </div>
+            </div>
             <div class="border border-border-100 rounded-xl overflow-hidden">
               <div class="max-w-full overflow-x-auto without-scrollbar">
                 <table class="w-full">
@@ -94,18 +106,6 @@
                     </tr>
                   </tbody>
                 </table>
-              </div>
-            </div>
-            <div class="grid grid-cols-3 gap-4">
-              <div
-                v-for="stat in statsCards"
-                :key="stat.title"
-                class="border border-border-100 rounded-xl bg-white-100 p-4"
-              >
-                <div class="text-2xl font-bold text-heading-100 mb-1 uppercase">
-                  {{ stat.value }}
-                </div>
-                <div class="text-[17px] capitalize">{{ stat.title }}</div>
               </div>
             </div>
           </div>
