@@ -22,29 +22,62 @@
               <LayoutDashboard :size="22" :stroke-width="1.75" />
               <span class="flex-1 pt-[1px]">Dashboard</span>
             </RouterLink>
+            <div>
+              <div
+                @click="isMenu = !isMenu"
+                class="text-heading-100 px-3 py-2 flex items-center gap-2 transition-all hover:text-primary-100 rounded-md cursor-pointer"
+              >
+                <Aperture :size="22" :stroke-width="1.75" />
+                <span class="flex-1 pt-[1px]">Campaigns</span
+                ><span
+                  class="transition-all duration-100 transform"
+                  :class="isMenu ? 'rotate-90' : ''"
+                  ><ChevronRight :size="18" :stroke-width="1.75"
+                /></span>
+              </div>
+              <div v-if="isMenu">
+                <RouterLink
+                  @click="closeSidebar"
+                  :to="{ name: 'campaigns' }"
+                  class="text-heading-100 px-3 py-2 flex items-center gap-2 transition-all hover:text-primary-100 rounded-md"
+                  ><span
+                    class="ml-2 mr-2 inline-flex h-1 w-1 rounded-full bg-current transition-all duration-200 opacity-40"
+                  ></span
+                  ><span class="flex-1">List</span></RouterLink
+                ><RouterLink
+                  @click="closeSidebar"
+                  :to="{ name: 'campaign-wizard' }"
+                  class="text-heading-100 px-3 py-2 flex items-center gap-2 transition-all hover:text-primary-100 rounded-md"
+                  ><span
+                    class="ml-2 mr-2 inline-flex h-1 w-1 rounded-full bg-current transition-all duration-200 opacity-40"
+                  ></span
+                  ><span class="flex-1">Start New</span></RouterLink
+                >
+              </div>
+            </div>
             <RouterLink
               @click="closeSidebar"
-              :to="{ name: 'campaign-wizard' }"
+              :to="{ name: 'contacts' }"
               class="text-heading-100 px-3 py-2 flex items-center gap-2 transition-all hover:text-primary-100 rounded-md"
             >
-              <Aperture :size="22" :stroke-width="1.75" />
-              <span class="flex-1 pt-[1px]">Campaign Wizard</span>
-            </RouterLink>
-            <RouterLink
-              @click="closeSidebar"
-              :to="{ name: 'campaign-details' }"
-              class="text-heading-100 px-3 py-2 flex items-center gap-2 transition-all hover:text-primary-100 rounded-md"
-            >
-              <Target :size="22" :stroke-width="1.75" />
-              <span class="flex-1 pt-[1px]">Campaign Details</span>
+              <Contact :size="22" :stroke-width="1.75" />
+              <span class="flex-1 pt-[1px]">Contacts</span>
             </RouterLink>
             <RouterLink
               @click="closeSidebar"
               :to="{ name: 'phone-numbers' }"
               class="text-heading-100 px-3 py-2 flex items-center gap-2 transition-all hover:text-primary-100 rounded-md"
             >
-              <Phone :size="22" :stroke-width="1.75" />
+              <NotebookTabs :size="22" :stroke-width="1.75" />
               <span class="flex-1 pt-[1px]">Phone Numbers</span>
+            </RouterLink>
+            <RouterLink
+              @click="closeSidebar"
+              :to="{ name: 'call-logs' }"
+              class="text-heading-100 px-3 py-2 flex items-center gap-2 transition-all hover:text-primary-100 rounded-md"
+            >
+              <PhoneCall :size="22" :stroke-width="1.75" />
+              <span class="flex-1 pt-[1px]">Call Logs</span>
             </RouterLink>
           </div>
         </div>
@@ -57,18 +90,30 @@
 </template>
 
 <script>
-import { LayoutDashboard, Aperture, Target, Phone } from 'lucide-vue-next'
+import {
+  LayoutDashboard,
+  Aperture,
+  Target,
+  NotebookTabs,
+  ChevronRight,
+  Contact,
+  PhoneCall,
+} from 'lucide-vue-next'
 export default {
   components: {
     LayoutDashboard,
     Aperture,
     Target,
-    Phone,
+    NotebookTabs,
+    ChevronRight,
+    Contact,
+    PhoneCall,
   },
   data() {
     return {
       isCollapse: false,
       isCollapsed: false,
+      isMenu: false,
     }
   },
   mounted() {
@@ -79,6 +124,7 @@ export default {
   methods: {
     closeSidebar() {
       this.isCollapsed = false
+      this.isMenu = false
       window.dispatchEvent(
         new CustomEvent('isCollapsed', {
           detail: {

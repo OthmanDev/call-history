@@ -1,11 +1,12 @@
 <template>
   <header class="border-b border-border-100 bg-white-100">
     <div class="flex items-center justify-between h-[56px] px-6">
-      <div class="flex items-center gap-3">
+      <div class="flex items-center gap-4">
         <span class="cursor-pointer text-heading-100 xl:flex hidden" @click="collapseSidebar">
           <menu-right-icon class="w-[23px] h-[23px]" />
         </span>
         <h1 class="text-xl font-bold text-heading-100 leading-none mt-[2.5px]">{{ title }}</h1>
+        <slot></slot>
       </div>
       <div class="flex items-center gap-2">
         <div class="relative z-[1001]">

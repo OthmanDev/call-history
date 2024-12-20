@@ -25,18 +25,16 @@
               v-for="stat in campaignStats"
               :key="stat.label"
             >
-              <div class="">
-                <div class="text-2xl font-bold text-heading-100 mb-1 uppercase">
-                  {{ stat.value }}
-                </div>
-                <div class="text-[17px] capitalize">{{ stat.label }}</div>
+              <div class="text-2xl font-bold text-heading-100 mb-1 uppercase">
+                {{ stat.value }}
               </div>
+              <div class="text-[17px] capitalize">{{ stat.label }}</div>
             </div>
           </div>
           <div class="mt-4">
             <div class="border border-border-100 rounded-xl overflow-hidden">
               <div class="border-b border-border-100 p-4">
-                <div class="flex items-center gap-4">
+                <div class="flex items-center gap-2">
                   <div class="relative flex-1">
                     <input
                       v-model="searchQuery"

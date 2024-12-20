@@ -9,19 +9,34 @@ const router = createRouter({
       component: () => import('@/views/DashboardView.vue'),
     },
     {
+      path: '/campaigns',
+      name: 'campaigns',
+      component: () => import('@/views/CampaignsView.vue'),
+    },
+    {
       path: '/campaign-wizard',
       name: 'campaign-wizard',
       component: () => import('@/views/CampaignWizardView.vue'),
     },
     {
-      path: '/campaign-details',
+      path: '/campaigns/:id',
       name: 'campaign-details',
       component: () => import('@/views/CampaignDetailsView.vue'),
+    },
+    {
+      path: '/contacts',
+      name: 'contacts',
+      component: () => import('@/views/ContactsView.vue'),
     },
     {
       path: '/phone-numbers',
       name: 'phone-numbers',
       component: () => import('@/views/PhoneNumbersView.vue'),
+    },
+    {
+      path: '/call-logs',
+      name: 'call-logs',
+      component: () => import('@/views/CallLogsView.vue'),
     },
   ],
 })
