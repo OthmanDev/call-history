@@ -29,15 +29,28 @@
           Here’s What happening on your dashboard today. See the insights at once.
         </p>
       </div>
+      <!-- <SignedIn>
+        <UserButton />
+      </SignedIn>
+      <SignedOut>
+        <SignInButton />
+      </SignedOut> -->
     </div>
   </main>
 </template>
 
 <script>
+import { SignedIn, SignedOut, SignInButton, UserButton, SignOutButton } from '@clerk/vue'
+
 import Topbar from '@/components/Topbar.vue'
 export default {
   components: {
     Topbar,
+    SignedIn,
+    SignedOut,
+    SignInButton,
+    UserButton,
+    SignOutButton,
   },
 }
 </script>

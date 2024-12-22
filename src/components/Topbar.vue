@@ -13,9 +13,9 @@
           <div class="flex items-center gap-2 cursor-pointer" @click="isMenuOpen = !isMenuOpen">
             <div class="relative">
               <img
-                src="https://demos.pixinvent.com/vuexy-vuejs-admin-template/demo-1/images/avatars/avatar-1.png"
+                :src="userStore.user?.imageUrl"
                 loading="lazy"
-                alt="Greg"
+                :alt="userStore.user?.fullName"
                 class="w-[40px] h-[40px] rounded-full"
               />
               <span
@@ -25,7 +25,9 @@
               </span>
             </div>
             <div class="pt-[6px]">
-              <span class="font-medium block text-heading-100 leading-none">Talkforce AI</span>
+              <span class="font-medium block text-heading-100 leading-none">{{
+                userStore.user?.fullName
+              }}</span>
               <span class="text-sm">Owner</span>
             </div>
           </div>
@@ -72,12 +74,14 @@
                 <span><Network :size="20" :stroke-width="1.75" /></span>
                 <span class="flex-1 pt-[1px]">See Workspaces</span>
               </div>
-              <div
-                class="text-heading-100 flex items-center gap-2 transition-all hover:text-primary-100 rounded-md cursor-pointer"
-              >
-                <span><LogOut :size="20" :stroke-width="1.75" /></span>
-                <span class="flex-1 pt-[1px]">Sign Out</span>
-              </div>
+              <SignOutButton>
+                <div
+                  class="text-heading-100 flex items-center gap-2 transition-all hover:text-primary-100 rounded-md cursor-pointer"
+                >
+                  <span><LogOut :size="20" :stroke-width="1.75" /></span>
+                  <span class="flex-1 pt-[1px]">Sign Out</span>
+                </div>
+              </SignOutButton>
             </div>
           </div>
         </div>
@@ -122,7 +126,13 @@
 
 <script>
 import { UserCircle, LogOut, Users, Building, Plus, Network, X } from 'lucide-vue-next'
+import { useUserStore } from '@/stores/user'
+import { SignOutButton } from '@clerk/vue'
 export default {
+  setup() {
+    const userStore = useUserStore()
+    return { userStore }
+  },
   props: {
     title: {
       type: String,
@@ -136,6 +146,7 @@ export default {
     Plus,
     Network,
     X,
+    SignOutButton,
   },
   data() {
     return {
@@ -203,16 +214,22 @@ export default {
       this.isAddOpen = true
       this.isMenuOpen = false
     },
-
     closeAddWorkspace() {
       this.isAddOpen = false
       this.newWorkspaceName = ''
     },
-
     createWorkspace() {
-      // Implement workspace creation logic here
       console.log('Creating workspace:', this.newWorkspaceName)
       this.closeAddWorkspace()
+    },
+    async handleSignOut() {
+      // try {
+      //   await this.$clerk.signOut()
+      //   // Optionally redirect after sign out
+      //   this.$router.push('/signin')
+      // } catch (error) {
+      //   console.error('Error signing out:', error)
+      // }
     },
   },
 }

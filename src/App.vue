@@ -1,7 +1,7 @@
 <template>
   <main class="min-h-screen bg-[#F8F7FA] bg-opacity-80">
     <aside
-      v-if="!$route.meta.isHideSidebar"
+      v-if="isSignedIn && $route.name !== 'signup'"
       class="fixed top-0 left-0 z-[9998] h-full w-[260px] bg-white-100 border-r border-border-100 transition-all duration-100"
       :class="[isCollapsed ? 'xl:left-0' : 'xl:-left-[260px]']"
     >
@@ -83,13 +83,15 @@
         </div>
       </div>
     </aside>
-    <div class="ml-[260px]">
-      <RouterView />
+    <div :class="!isSignedIn ? 'ml-0' : 'ml-[260px]'">
+      <RouterView :key="$route.path" />
     </div>
   </main>
 </template>
 
 <script>
+import { useSession, useUser, useAuth } from '@clerk/vue'
+import { useUserStore } from '@/stores/user'
 import {
   LayoutDashboard,
   Aperture,
@@ -108,6 +110,20 @@ export default {
     ChevronRight,
     Contact,
     PhoneCall,
+  },
+  setup() {
+    const userStore = useUserStore()
+    const { session } = useSession()
+    const { isSignedIn, user, isLoaded } = useUser()
+    const { getToken } = useAuth()
+    const getTokens = async () => {
+      const token = await getToken.value()
+      return token
+    }
+    getTokens().then((res) => {
+      userStore.setToken(res)
+    })
+    return { session, userStore, isSignedIn, user, isLoaded }
   },
   data() {
     return {
@@ -132,6 +148,28 @@ export default {
           },
         }),
       )
+    },
+  },
+  watch: {
+    isLoaded() {
+      if (this.isLoaded) {
+        this.userStore.setUser(this.user)
+      }
+    },
+    isSignedIn() {
+      if (!this.isSignedIn) {
+        if (this.$route.name === 'dashboard') {
+          this.$router.push({ name: 'signin' })
+        }
+        if (this.$route.name === 'signin') {
+          this.$router.push({ name: 'signin' })
+        }
+        if (this.$route.name === 'signup') {
+          this.$router.push({ name: 'signup' })
+        }
+      } else {
+        this.$router.push({ name: 'dashboard' })
+      }
     },
   },
 }
