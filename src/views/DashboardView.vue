@@ -28,6 +28,15 @@
         <p class="text-[17px] mt-4">
           Here’s What happening on your dashboard today. See the insights at once.
         </p>
+        <div v-if="workspacesStore.workspaces.length === 0" class="mt-4">
+          <button
+            @click="isAddOpen = true"
+            class="flex items-center gap-2 h-11 px-4 bg-primary-100 text-white-100 rounded-md leading-none transition-all duration-150 hover:brightness-125 font-medium"
+          >
+            <Plus :size="18" :stroke-width="1.75" />
+            Add a workspace to continue
+          </button>
+        </div>
       </div>
       <!-- <SignedIn>
         <UserButton />
@@ -37,12 +46,17 @@
       </SignedOut> -->
     </div>
   </main>
+  <CreateWorkspace v-if="isAddOpen" @closeAddWorkspace="closeAddWorkspace" />
 </template>
 
 <script>
 import { SignedIn, SignedOut, SignInButton, UserButton, SignOutButton } from '@clerk/vue'
+import { Plus } from 'lucide-vue-next'
 import Topbar from '@/components/Topbar.vue'
+import CreateWorkspace from '@/components/CreateWorkspace.vue'
 import { useUserStore } from '@/stores/user'
+import { useWorkspacesStore } from '@/stores/workspaces'
+
 export default {
   components: {
     Topbar,
@@ -51,10 +65,23 @@ export default {
     SignInButton,
     UserButton,
     SignOutButton,
+    Plus,
+    CreateWorkspace,
   },
   setup() {
     const useStore = useUserStore()
-    return { useStore }
+    const workspacesStore = useWorkspacesStore()
+    return { useStore, workspacesStore }
+  },
+  data() {
+    return {
+      isAddOpen: false,
+    }
+  },
+  methods: {
+    closeAddWorkspace() {
+      this.isAddOpen = false
+    },
   },
 }
 </script>

@@ -69,6 +69,14 @@ const router = createRouter({
         requireAuth: true,
       },
     },
+    {
+      path: '/workspaces',
+      name: 'workspaces',
+      component: () => import('@/views/WorkspacesView.vue'),
+      meta: {
+        requireAuth: true,
+      },
+    },
   ],
 })
 router.beforeEach(async (to) => {
@@ -79,7 +87,7 @@ router.beforeEach(async (to) => {
       throw new Error('Not loggedin.')
     }
   } catch (error) {
-    return '/signin'
+    window.location.href = '/signin'
   }
 })
 

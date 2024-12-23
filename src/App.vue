@@ -24,7 +24,7 @@
               <LayoutDashboard :size="22" :stroke-width="1.75" />
               <span class="flex-1 pt-[1px]">Dashboard</span>
             </RouterLink>
-            <div>
+            <div v-if="workspacesStore.workspaces.length > 0">
               <div
                 @click="isMenu = !isMenu"
                 class="text-heading-100 px-3 py-2 flex items-center gap-2 transition-all hover:text-primary-100 rounded-md cursor-pointer"
@@ -58,6 +58,7 @@
               </div>
             </div>
             <RouterLink
+              v-if="workspacesStore.workspaces.length > 0"
               @click="closeSidebar"
               :to="{ name: 'contacts' }"
               class="text-heading-100 px-3 py-2 flex items-center gap-2 transition-all hover:text-primary-100 rounded-md"
@@ -66,6 +67,7 @@
               <span class="flex-1 pt-[1px]">Contacts</span>
             </RouterLink>
             <RouterLink
+              v-if="workspacesStore.workspaces.length > 0"
               @click="closeSidebar"
               :to="{ name: 'phone-numbers' }"
               class="text-heading-100 px-3 py-2 flex items-center gap-2 transition-all hover:text-primary-100 rounded-md"
@@ -74,6 +76,7 @@
               <span class="flex-1 pt-[1px]">Phone Numbers</span>
             </RouterLink>
             <RouterLink
+              v-if="workspacesStore.workspaces.length > 0"
               @click="closeSidebar"
               :to="{ name: 'call-logs' }"
               class="text-heading-100 px-3 py-2 flex items-center gap-2 transition-all hover:text-primary-100 rounded-md"
@@ -94,8 +97,10 @@
 <script>
 import { useUser, useAuth } from '@clerk/vue'
 import { useUserStore } from '@/stores/user'
+import { useWorkspacesStore } from '@/stores/workspaces'
 import Toast from '@/components/Toast.vue'
 import Loader from '@/components/Loader.vue'
+import ApiRequest from '@/libs/ApiRequest'
 import {
   LayoutDashboard,
   Aperture,
@@ -119,6 +124,7 @@ export default {
   },
   setup() {
     const userStore = useUserStore()
+    const workspacesStore = useWorkspacesStore()
     const { isSignedIn, user, isLoaded } = useUser()
     const { getToken } = useAuth()
     const getTokens = async () => {
@@ -129,7 +135,7 @@ export default {
       userStore.setToken(res)
       localStorage.setItem('access_token', res)
     })
-    return { userStore, isSignedIn, user, isLoaded }
+    return { userStore, workspacesStore, isSignedIn, user, isLoaded }
   },
   data() {
     return {
@@ -139,8 +145,12 @@ export default {
     }
   },
   mounted() {
+    this.getWorkspaces()
     window.addEventListener('collapseSidebar', (event) => {
       this.isCollapsed = event.detail.isCollapsed
+    })
+    window.addEventListener('workspaces', () => {
+      this.getWorkspaces()
     })
   },
   methods: {
@@ -154,6 +164,14 @@ export default {
           },
         }),
       )
+    },
+    async getWorkspaces() {
+      try {
+        const { data } = await ApiRequest().get(`/api/v1/workspaces/list`)
+        this.workspacesStore.setWorkspaces(data)
+      } catch (e) {
+        console.error(e)
+      }
     },
   },
   watch: {
@@ -174,6 +192,9 @@ export default {
           this.$router.push({ name: 'signup' })
         }
       } else {
+        if (this.workspacesStore.workspaces.length === 0) {
+          this.$router.push({ name: 'dashboard' })
+        }
       }
     },
   },
