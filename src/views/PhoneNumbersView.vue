@@ -21,15 +21,15 @@
         <div class="p-4">
           <div class="grid gap-4">
             <div
-              v-for="number in phoneNumbers"
-              :key="number.id"
+              v-for="(number, key) in phoneNumbers"
+              :key="key"
               class="rounded-xl bg-white-100 border border-border-100"
             >
               <div class="border-b border-border-100 p-4">
                 <div class="flex items-start justify-between">
                   <div>
-                    <h2 class="text-lg font-bold text-primary-100">{{ number.number }}</h2>
-                    <p class="text-sm">ID: {{ number.id }}</p>
+                    <h2 class="text-lg font-bold text-primary-100">{{ number.phone_number_pretty }}</h2>
+                    <p class="text-sm">ID: {{ number.phone_number }}</p>
                   </div>
                   <button
                     class="flex items-center gap-2 h-10 px-3 bg-success-100 text-white-100 rounded-md leading-none transition-all duration-150 hover:brightness-125 font-medium"
@@ -39,7 +39,6 @@
                   </button>
                 </div>
               </div>
-
               <div class="p-4">
                 <div class="space-y-4">
                   <!-- Agent Configuration -->
@@ -146,6 +145,9 @@
 <script>
 import { Plus, ChevronDown, ShieldCheck, Building } from 'lucide-vue-next'
 import Topbar from '@/components/Topbar.vue'
+import { useLoaderStore } from '@/stores/loader'
+import ApiRequest from '@/libs/ApiRequest'
+
 export default {
   name: 'PhoneNumbersPage',
   components: {
@@ -154,6 +156,13 @@ export default {
     ChevronDown,
     ShieldCheck,
     Building,
+  },
+  setup() {
+    const loaderStore = useLoaderStore()
+    return { loaderStore }
+  },
+  mounted() {
+    this.getPhoneNumbers()
   },
   data() {
     return {
@@ -185,27 +194,30 @@ export default {
       ],
     }
   },
-
   methods: {
+    async getPhoneNumbers() {
+      this.loaderStore.setIsLoading(true)
+      try {
+        const { data } = await ApiRequest().get(`/api/v1/numbers/list`)
+        this.phoneNumbers = data
+      } catch (e) {
+        console.error(e)
+      } finally {
+        this.loaderStore.setIsLoading(false)
+      }
+    },
     addPhoneNumber() {
-      // Implement add phone number logic
       console.log('Adding new phone number')
     },
-
     makeOutboundCall(number) {
-      // Implement outbound call logic
       console.log('Making outbound call to:', number.number)
     },
-
     toggleVerification(number) {
       number.isVerified = !number.isVerified
-      // Implement verification logic
       console.log('Toggling verification for:', number.number)
     },
-
     toggleBrandedCalls(number) {
       number.hasBrandedCalls = !number.hasBrandedCalls
-      // Implement branded calls logic
       console.log('Toggling branded calls for:', number.number)
     },
   },

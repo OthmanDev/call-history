@@ -98,7 +98,6 @@
 import { Plus, Trash2 } from 'lucide-vue-next'
 import Topbar from '@/components/Topbar.vue'
 import CreateWorkspace from '@/components/CreateWorkspace.vue'
-import { useUserStore } from '@/stores/user'
 import { useWorkspacesStore } from '@/stores/workspaces'
 import { useLoaderStore } from '@/stores/loader'
 import ApiRequest from '@/libs/ApiRequest'
@@ -111,10 +110,9 @@ export default {
     Trash2,
   },
   setup() {
-    const useStore = useUserStore()
     const workspacesStore = useWorkspacesStore()
     const loaderStore = useLoaderStore()
-    return { useStore, workspacesStore, loaderStore }
+    return { workspacesStore, loaderStore }
   },
   data() {
     return {
