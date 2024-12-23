@@ -1,4 +1,6 @@
 <template>
+  <Toast />
+  <Loader />
   <main class="min-h-screen bg-[#F8F7FA] bg-opacity-80">
     <aside
       v-if="isSignedIn && $route.name !== 'signup'"
@@ -90,8 +92,10 @@
 </template>
 
 <script>
-import { useSession, useUser, useAuth } from '@clerk/vue'
+import { useUser, useAuth } from '@clerk/vue'
 import { useUserStore } from '@/stores/user'
+import Toast from '@/components/Toast.vue'
+import Loader from '@/components/Loader.vue'
 import {
   LayoutDashboard,
   Aperture,
@@ -110,10 +114,11 @@ export default {
     ChevronRight,
     Contact,
     PhoneCall,
+    Toast,
+    Loader,
   },
   setup() {
     const userStore = useUserStore()
-    const { session } = useSession()
     const { isSignedIn, user, isLoaded } = useUser()
     const { getToken } = useAuth()
     const getTokens = async () => {
@@ -122,8 +127,9 @@ export default {
     }
     getTokens().then((res) => {
       userStore.setToken(res)
+      localStorage.setItem('access_token', res)
     })
-    return { session, userStore, isSignedIn, user, isLoaded }
+    return { userStore, isSignedIn, user, isLoaded }
   },
   data() {
     return {
@@ -168,7 +174,6 @@ export default {
           this.$router.push({ name: 'signup' })
         }
       } else {
-        this.$router.push({ name: 'dashboard' })
       }
     },
   },

@@ -27,32 +27,34 @@
           >
             <div class="p-3 grid gap-2">
               <span
-                @click="getCustomersByPeriod('today')"
+                @click="getCustomersByPeriod(1)"
                 class="cursor-pointer text-[15px]"
-                :class="[currentPediod.value === 'today' ? 'text-primary-100 font-medium' : '']"
+                :class="[currentPediod.value === 1 ? 'text-primary-100 font-medium' : '']"
                 >Today</span
               >
               <span
-                @click="getCustomersByPeriod('yesterday')"
+                @click="getCustomersByPeriod(2)"
                 class="cursor-pointer text-[15px]"
-                :class="[currentPediod.value === 'yesterday' ? 'text-primary-100 font-medium' : '']"
+                :class="[currentPediod.value === 2 ? 'text-primary-100 font-medium' : '']"
                 >Yesterday</span
               >
               <span
-                @click="getCustomersByPeriod('last_three_days')"
+                @click="getCustomersByPeriod(3)"
                 class="cursor-pointer text-[15px]"
-                :class="[
-                  currentPediod.value === 'last_three_days' ? 'text-primary-100 font-medium' : '',
-                ]"
+                :class="[currentPediod.value === 3 ? 'text-primary-100 font-medium' : '']"
                 >Last 3 days</span
               >
               <span
-                @click="getCustomersByPeriod('last_seven_days')"
+                @click="getCustomersByPeriod(7)"
                 class="cursor-pointer text-[15px]"
-                :class="[
-                  currentPediod.value === 'last_seven_days' ? 'text-primary-100 font-medium' : '',
-                ]"
+                :class="[currentPediod.value === 7 ? 'text-primary-100 font-medium' : '']"
                 >Last 7 days</span
+              >
+              <span
+                @click="getCustomersByPeriod(0)"
+                class="cursor-pointer text-[15px]"
+                :class="[currentPediod.value === 0 ? 'text-primary-100 font-medium' : '']"
+                >All Time</span
               >
             </div>
           </div>
@@ -68,7 +70,7 @@
             </div>
             <div>
               <h4 class="text-2xl font-bold text-heading-100 mb-1 uppercase">
-                {{ totalCalls }}
+                {{ callsLogs.totalElements }}
               </h4>
               <span class="text-[17px] capitalize">Total Calls</span>
             </div>
@@ -83,7 +85,7 @@
             </div>
             <div>
               <h4 class="text-2xl font-bold text-heading-100 mb-1 uppercase">
-                {{ connectedCalls }}
+                {{ callsLogs.totalPickupCalls }}
               </h4>
               <span class="text-[17px] capitalize">Picked Up Calls</span>
             </div>
@@ -96,7 +98,6 @@
             <span class="text-lg font-bold text-heading-100">Call Logs</span>
             <div class="flex items-center gap-2">
               <button
-                :class="[customers.data.length === 0 ? 'pointer-events-none opacity-50' : '']"
                 @click="moreFilters = !moreFilters"
                 class="flex items-center h-11 gap-5 px-4 bg-primary-100 text-white-100 rounded-md leading-none transition-all duration-150 hover:brightness-125 font-medium"
               >
@@ -111,19 +112,12 @@
                 />
               </button>
               <button
-                :class="[filteredCustomers.length === 0 ? 'pointer-events-none opacity-50' : '']"
-                @click="exportCSV"
+                :class="[callsLogs.empty ? 'pointer-events-none opacity-50' : '']"
+                @click="exportCSV()"
                 class="flex items-center gap-2 h-11 px-4 bg-primary-100 text-white-100 rounded-md leading-none transition-all duration-150 hover:brightness-125 font-medium"
               >
                 <Download :size="18" :stroke-width="1.75" />
                 Export CSV
-              </button>
-              <button
-                @click="showUploadContactsModal = true"
-                class="flex items-center gap-2 h-11 px-4 bg-primary-100 text-white-100 rounded-md leading-none transition-all duration-150 hover:brightness-125 font-medium"
-              >
-                <Upload :size="18" :stroke-width="1.75" />
-                Upload Contacts
               </button>
             </div>
           </div>
@@ -134,9 +128,10 @@
               <select
                 v-model="selectedDisposition"
                 class="w-full h-11 outline-none px-4 appearance-none cursor-pointer text-heading-100 rounded-md"
+                @change="filterCallsLogs()"
               >
                 <option selected disabled value="">Disposition</option>
-                <option v-for="(filter, key) in dispositionFilter" :key="key" :value="filter">
+                <option v-for="(filter, key) in callsLogs.dispositions" :key="key" :value="filter">
                   {{ filter }}
                 </option>
               </select>
@@ -147,7 +142,7 @@
               </span>
               <span
                 v-if="selectedDisposition !== ''"
-                @click="selectedDisposition = ''"
+                @click="clearCallsLogsFilter('disposition')"
                 class="absolute -top-1 -right-1 w-[14px] h-[14px] bg-danger-100 text-white-100 flex items-center justify-center cursor-pointer rounded-full"
               >
                 <X :size="10" :stroke-width="2" />
@@ -156,6 +151,7 @@
             <div class="relative flex items-center border border-border-100 rounded-md flex-1">
               <select
                 v-model="selectedDebt"
+                @change="filterCallsLogs()"
                 class="w-full h-11 outline-none px-4 appearance-none cursor-pointer text-heading-100 rounded-md"
               >
                 <option selected disabled value="">Has Debt</option>
@@ -170,69 +166,7 @@
               </span>
               <span
                 v-if="selectedDebt !== ''"
-                @click="selectedDebt = ''"
-                class="absolute -top-1 -right-1 w-[14px] h-[14px] bg-danger-100 text-white-100 flex items-center justify-center cursor-pointer rounded-full"
-              >
-                <X :size="10" :stroke-width="2" />
-              </span>
-            </div>
-            <div
-              v-if="false"
-              class="relative flex items-center border border-border-100 rounded-md flex-1"
-            >
-              <input
-                v-model="selectedLeadSource"
-                type="text"
-                class="w-full h-11 outline-none px-4 text-heading-100 rounded-md"
-                placeholder="Lead Source"
-              />
-              <span
-                v-if="selectedLeadSource !== ''"
-                @click="selectedLeadSource = ''"
-                class="absolute -top-1 -right-1 w-[14px] h-[14px] bg-danger-100 text-white-100 flex items-center justify-center cursor-pointer rounded-full"
-              >
-                <X :size="10" :stroke-width="2" />
-              </span>
-            </div>
-            <div
-              v-if="false"
-              class="relative flex items-center border border-border-100 rounded-md flex-1"
-            >
-              <select
-                v-model="selectedStage"
-                class="w-full h-11 outline-none px-4 appearance-none cursor-pointer text-heading-100 rounded-md"
-              >
-                <option selected disabled value="-1">Stage</option>
-                <option v-for="(filter, key) in stages" :key="key" :value="filter.key">
-                  {{ filter.value }}
-                </option>
-              </select>
-              <span
-                class="absolute top-0 right-0 bottom-0 w-[40px] bg-white-100 pointer-events-none flex items-center justify-center rounded-tr-md rounded-br-md"
-              >
-                <ChevronDown :size="18" :stroke-width="1.75" />
-              </span>
-              <span
-                v-if="selectedStage !== '-1'"
-                @click="selectedStage = '-1'"
-                class="absolute -top-1 -right-1 w-[14px] h-[14px] bg-danger-100 text-white-100 flex items-center justify-center cursor-pointer rounded-full"
-              >
-                <X :size="10" :stroke-width="2" />
-              </span>
-            </div>
-            <div
-              v-if="false"
-              class="relative flex items-center border border-border-100 rounded-md flex-1"
-            >
-              <input
-                v-model="selectedState"
-                type="text"
-                class="w-full h-11 outline-none px-4 text-heading-100 rounded-md"
-                placeholder="State"
-              />
-              <span
-                v-if="selectedState !== ''"
-                @click="selectedState = ''"
+                @click="clearCallsLogsFilter('hasDebt')"
                 class="absolute -top-1 -right-1 w-[14px] h-[14px] bg-danger-100 text-white-100 flex items-center justify-center cursor-pointer rounded-full"
               >
                 <X :size="10" :stroke-width="2" />
@@ -240,14 +174,16 @@
             </div>
             <div class="relative flex items-center border border-border-100 rounded-md flex-1">
               <input
+                @input="filterCallsLogs()"
                 v-model="debtAmount"
                 type="number"
                 class="w-full h-11 outline-none px-4 text-heading-100 rounded-md"
                 placeholder="Debt Amount"
+                min="1"
               />
               <span
                 v-if="debtAmount !== ''"
-                @click="debtAmount = ''"
+                @click="clearCallsLogsFilter('debtAmount')"
                 class="absolute -top-1 -right-1 w-[14px] h-[14px] bg-danger-100 text-white-100 flex items-center justify-center cursor-pointer rounded-full"
               >
                 <X :size="10" :stroke-width="2" />
@@ -255,14 +191,16 @@
             </div>
             <div class="relative flex items-center border border-border-100 rounded-md flex-1">
               <input
+                @input="filterCallsLogs()"
                 v-model="selectedPayment"
                 type="number"
                 class="w-full h-11 outline-none px-4 text-heading-100 rounded-md"
                 placeholder="Payment"
+                min="1"
               />
               <span
                 v-if="selectedPayment !== ''"
-                @click="selectedPayment = ''"
+                @click="clearCallsLogsFilter('payment')"
                 class="absolute -top-1 -right-1 w-[14px] h-[14px] bg-danger-100 text-white-100 flex items-center justify-center cursor-pointer rounded-full"
               >
                 <X :size="10" :stroke-width="2" />
@@ -271,7 +209,7 @@
           </div>
         </div>
         <div class="max-w-full overflow-x-auto without-scrollbar">
-          <table v-if="filteredCustomersPaginated.length > 0" class="w-full">
+          <table v-if="!callsLogs.empty" class="w-full">
             <thead>
               <tr class="bg-[#F8F7FA] border-b border-border-100">
                 <th
@@ -328,7 +266,7 @@
               </tr>
             </thead>
             <tbody class="divide-y divide-border-100">
-              <template v-for="(customer, index) in filteredCustomersPaginated" :key="index">
+              <template v-for="(call, index) in callsLogs.content" :key="index">
                 <tr>
                   <td class="p-3 text-left font-medium text-[15px]">
                     <button @click="toggleExpandedRow(index)" class="mt-1.5">
@@ -344,94 +282,66 @@
                     </button>
                   </td>
                   <td class="p-3 text-left font-medium text-[15px]">
-                    {{ formatDate(customer?.start_timestamp) }}
+                    {{ formatDate(call?.startTime) }}
                   </td>
                   <td class="p-3 text-left font-medium text-[15px]">
-                    {{ customer.contact?.name || '-' }}
+                    {{ call?.name || '-' }}
                   </td>
                   <td class="p-3 text-left font-medium text-[15px]">
-                    {{ customer.contact?.company || '-' }}
+                    {{ call?.company || '-' }}
                   </td>
                   <td class="p-3 text-left font-medium text-[15px]">
-                    {{ customer.contact?.phone || '-' }}
+                    {{ callt?.phone || '-' }}
                   </td>
                   <td class="p-3 text-left font-medium text-[15px]">
-                    {{ customer.contact?.state || '-' }}
+                    {{ call?.state || '-' }}
                   </td>
                   <td class="p-3 text-left font-medium text-[15px]">
-                    {{ formatDuration(customer?.call_cost?.total_duration_seconds) }}
+                    {{ formatDuration(call?.duration) }}
                   </td>
                   <td class="p-3 text-left font-medium text-[15px]">
                     <span
                       class="inline-flex items-center text-center h-8 px-2 text-[15px] rounded-md bg-opacity-10 capitalize"
-                      :class="callStatus(customer.call_status)"
+                      :class="callStatus(call.status)"
                     >
-                      {{ customer.call_status }}
+                      {{ call.status }}
                     </span>
                   </td>
                   <td class="p-3 text-left font-medium text-[15px]">
                     <span
                       class="inline-flex items-center text-center h-8 px-2 text-[15px] rounded-md bg-[#F8F7FA]"
                     >
-                      {{ customer.disconnection_reason }}
+                      {{ call.disconnectionReason }}
                     </span>
                   </td>
                   <td class="p-3 text-left font-medium text-[15px]">1</td>
                   <td class="p-3 text-left font-medium text-[15px]">
-                    <span>
-                      {{
-                        customer.call_analysis.custom_analysis_data?.hasOwnProperty(
-                          'weekly_payments',
-                        )
-                          ? customer.call_analysis.custom_analysis_data.weekly_payments
-                          : '-'
-                      }}</span
-                    >
+                    <span> {{ call.weeklyPayments ? call.weeklyPayments : '-' }}</span>
                   </td>
                   <td class="p-3 text-left font-medium text-[15px]">
                     <span
-                      v-if="customer.call_analysis.custom_analysis_data?.hasOwnProperty('has_debt')"
                       class="inline-flex items-center text-center h-8 px-2 text-[15px] rounded-md bg-[#F8F7FA]"
                     >
-                      {{ customer.call_analysis.custom_analysis_data.has_debt }}</span
-                    >
-                    <span v-else>-</span>
-                  </td>
-                  <td class="p-3 text-left font-medium text-[15px]">
-                    <span>
-                      {{
-                        customer.call_analysis.custom_analysis_data?.hasOwnProperty('total_debt')
-                          ? customer.call_analysis.custom_analysis_data.total_debt
-                          : '-'
-                      }}</span
+                      {{ call.hasDebt }}</span
                     >
                   </td>
                   <td class="p-3 text-left font-medium text-[15px]">
-                    <span>
-                      {{
-                        customer.call_analysis.custom_analysis_data?.hasOwnProperty('advances')
-                          ? customer.call_analysis.custom_analysis_data.advances
-                          : '-'
-                      }}</span
-                    >
+                    <span> {{ call.totalDebt ? call.totalDebt : '-' }}</span>
                   </td>
                   <td class="p-3 text-left font-medium text-[15px]">
-                    <span>
-                      {{
-                        customer.call_analysis.custom_analysis_data?.hasOwnProperty('disposition')
-                          ? customer.call_analysis.custom_analysis_data.disposition
-                          : '-'
-                      }}</span
-                    >
+                    <span> {{ call.advances ? call.advances : '-' }}</span>
+                  </td>
+                  <td class="p-3 text-left font-medium text-[15px]">
+                    <span> {{ call.disposition ? call.disposition : '-' }}</span>
                   </td>
                   <td class="p-3 text-left font-medium text-[15px]">
                     <div
                       class="relative flex items-center overflow-hidden border border-border-100 rounded-md"
                     >
                       <select
-                        :class="[customer.contact ? '' : 'pointer-events-none opacity-45']"
-                        :value="customer.contact?.stage"
-                        @change="updateStage($event, customer)"
+                        :class="[call?.stage ? '' : 'pointer-events-none opacity-45']"
+                        :value="call?.stage"
+                        @change="updateStage($event, call)"
                         class="w-full h-10 outline-none px-2 appearance-none cursor-pointer text-heading-100"
                       >
                         <option disabled selected value="">Stage</option>
@@ -449,16 +359,16 @@
                   <td class="p-3 text-left font-medium text-[15px]">
                     <div class="flex items-center gap-2">
                       <span
-                        v-if="customer?.transcript"
-                        @click="showTranscriptPreviewModal(customer)"
+                        v-if="call?.transcript"
+                        @click="showTranscriptPreviewModal(call)"
                         class="cursor-pointer transition-colors duration-150 hover:text-info-100"
                         title="Show Transcript"
                       >
                         <View :size="20" :stroke-width="1.75" />
                       </span>
                       <span
-                        v-if="customer.contact?.notes"
-                        @click="showUpdateNoteModal(customer)"
+                        v-if="call?.notes"
+                        @click="showUpdateNoteModal(call)"
                         class="cursor-pointer transition-colors duration-150 hover:text-success-100"
                         title="Update Note"
                       >
@@ -470,33 +380,30 @@
                 <tr v-if="expandedRowId === index">
                   <td colspan="17" class="bg-[#F8F7FA] p-4">
                     <div class="flex gap-4">
-                      <div
-                        v-if="customer.contact"
-                        class="bg-white-100 border border-border-100 rounded-md flex-1"
-                      >
+                      <div class="bg-white-100 border border-border-100 rounded-md flex-1">
                         <div class="border-b border-border-100 p-4">
                           <h3 class="font-semibold text-heading-100">Business Details</h3>
                         </div>
                         <div class="p-4 grid gap-2">
-                          <p v-if="customer.contact?.lead_source">
+                          <p v-if="call?.lead_source">
                             <span class="font-medium text-heading-100">Lead Source</span>:
-                            {{ customer.contact.lead_source }}
+                            {{ call.lead_source }}
                           </p>
-                          <p v-if="customer.contact?.name">
+                          <p v-if="call?.name">
                             <span class="font-medium text-heading-100">Contact Name</span>:
-                            {{ customer.contact.name }}
+                            {{ call.name }}
                           </p>
-                          <p v-if="customer.contact?.company">
+                          <p v-if="call?.company">
                             <span class="font-medium text-heading-100">Business Name</span>:
-                            {{ customer.contact.company }}
+                            {{ call.company }}
                           </p>
-                          <p v-if="customer.contact?.state">
+                          <p v-if="call?.state">
                             <span class="font-medium text-heading-100">State</span>:
-                            {{ customer.contact.state }}
+                            {{ call.state }}
                           </p>
-                          <p v-if="customer.contact?.email">
+                          <p v-if="call?.email">
                             <span class="font-medium text-heading-100">Email</span>:
-                            {{ customer.contact.email }}
+                            {{ call.email }}
                           </p>
                         </div>
                       </div>
@@ -507,27 +414,27 @@
                         <div class="p-4 grid gap-2">
                           <p>
                             <span class="font-medium text-heading-100">Call ID</span>:
-                            {{ customer.call_id }}
+                            {{ call?.call_id }}
                           </p>
-                          <p v-if="customer.disconnection_reason">
+                          <p v-if="call.disconnectionReason">
                             <span class="font-medium text-heading-100">Disconnection Reason</span>:
-                            {{ customer.disconnection_reason }}
+                            {{ call.disconnectionReason }}
                           </p>
-                          <p v-if="customer.call_analysis?.user_sentiment">
+                          <p v-if="call?.user_sentiment">
                             <span class="font-medium text-heading-100">User Sentiment</span>:
-                            {{ customer.call_analysis.user_sentiment }}
+                            {{ call.user_sentiment }}
                           </p>
                           <p>
                             <span class="font-medium text-heading-100">Call From</span>:
-                            {{ customer.from_number }}
+                            {{ call.fromNumber }}
                           </p>
                           <p>
                             <span class="font-medium text-heading-100">Call To</span>:
-                            {{ customer.to_number }}
+                            {{ call.toNumber }}
                           </p>
-                          <p v-if="customer.llm_latency">
+                          <p v-if="call?.llm_latency">
                             <span class="font-medium text-heading-100">End to End Latency</span>:
-                            {{ customer.llm_latency.max }} ms
+                            {{ call.llm_latency.max }} ms
                           </p>
                         </div>
                       </div>
@@ -538,7 +445,7 @@
             </tbody>
           </table>
           <div
-            v-if="!isLoading && filteredCustomersPaginated.length === 0"
+            v-if="!loaderStore.loading && callsLogs.empty"
             class="h-[300px] flex items-center justify-center flex-col text-center"
           >
             <div class="w-[180px] mb-3">
@@ -597,7 +504,7 @@
           <div class="flex items-center px-4 py-3 justify-between">
             <nav class="flex items-center gap-2">
               <button
-                :class="[currentPage === 0 ? 'pointer-events-none opacity-50' : '']"
+                :class="[callsLogs.first ? 'pointer-events-none opacity-50' : '']"
                 class="flex items-center gap-2 h-11 px-4 bg-primary-100 text-white-100 rounded-md leading-none transition-all duration-150 hover:brightness-125 font-medium"
                 @click="prevPage"
               >
@@ -605,7 +512,7 @@
                 Previous
               </button>
               <button
-                :class="[currentPage === totalPages - 1 ? 'pointer-events-none opacity-50' : '']"
+                :class="[callsLogs.last ? 'pointer-events-none opacity-50' : '']"
                 class="flex items-center gap-2 h-11 px-4 bg-primary-100 text-white-100 rounded-md leading-none transition-all duration-150 hover:brightness-125 font-medium"
                 @click="nextPage"
               >
@@ -692,153 +599,6 @@
         </div>
       </div>
     </div>
-    <div
-      v-if="showUploadContactsModal"
-      class="bg-opacity-40 fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-heading-100"
-    >
-      <div class="max-w-xl rounded-xl w-full mx-auto bg-white-100">
-        <div class="flex items-center justify-between p-4 border-b border-border-100">
-          <h5 class="font-semibold leading-none text-lg text-heading-100">Upload Contacts</h5>
-          <span
-            @click="closeUploadContactsModal"
-            class="cursor-pointer transition-colors duration-100 hover:text-heading-100"
-          >
-            <X :size="24" :stroke-width="1.75" />
-          </span>
-        </div>
-        <div class="without-scrollbar max-h-modal overflow-y-auto p-4">
-          <div
-            class="relative border border-dashed border-border-100 rounded-xl h-[280px] hover:border-primary-100 transition-all"
-          >
-            <input
-              id="upload-contact"
-              type="file"
-              accept=".csv"
-              class="hidden"
-              @change="handleFileUpload"
-            />
-            <label
-              for="upload-contact"
-              class="absolute inset-0 cursor-pointer flex flex-col items-center justify-center text-center"
-            >
-              <span class="w-[120px] -mt-5">
-                <svg
-                  viewBox="0 0 173 173"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                  class="w-full h-full"
-                >
-                  <path
-                    d="M143.737 95.6949C145.677 89.2851 143.691 81.9055 139.584 76.7599C135.211 71.2814 128.406 67.9611 121.426 67.3235C114.445 66.6859 106.937 68.6091 100.92 72.2053C92.4437 54.9026 67.6873 50.3715 50.1256 65.9326C42.7395 72.4774 37.5485 80.3369 35.2819 89.9415C27.8162 89.2307 20.2598 93.1166 15.9024 99.2197C5.79705 113.374 11.8649 136.716 29.3052 141.151C35.7739 142.796 42.7237 142.838 49.3515 143.4C73.3259 145.463 121.123 151.259 144.068 140.858C155.765 135.556 165.92 122.251 160.485 108.985C159.077 105.547 156.489 102.599 153.309 100.69C151.555 99.6358 143.473 98.506 143.417 97.3003C143.392 96.7552 143.578 96.2214 143.737 95.6949Z"
-                    fill="hsl(249.64deg 70.98% 37.84% / 30%)"
-                  ></path>
-                  <path
-                    d="M157.038 97.4237C164.526 78.3978 152.438 56.3334 131.781 53.874C114.187 51.7794 97.1651 65.7836 95.8201 83.4535C94.3147 103.234 112.205 119.843 131.774 117.191C142.955 115.676 152.91 107.913 157.038 97.4237Z"
-                    fill="#321ca5"
-                  ></path>
-                  <path
-                    d="M128.646 73.6316C130.339 73.7115 131.64 75.052 131.554 76.6244C131.165 83.735 130.972 90.9488 130.983 98.067C130.985 99.6432 129.561 100.957 127.914 100.922C126.221 100.922 124.848 99.6489 124.846 98.0744C124.835 90.8579 125.03 83.544 125.425 76.3349C125.514 74.7271 127.005 73.5427 128.646 73.6316Z"
-                    fill="white"
-                  ></path>
-                  <path
-                    d="M129.878 70.7515C133.09 72.9676 136.297 76.8905 138.946 78.7169C140.342 79.6798 140.692 81.5907 139.73 82.985C138.768 84.3792 136.855 84.7297 135.463 83.7689C132.957 82.0418 130.679 79.5079 128.483 77.5064C126.853 79.2065 124.749 81.1562 122.123 83.4014C120.837 84.5021 118.899 84.3492 117.798 83.0638C116.697 81.7753 116.848 79.8386 118.136 78.737C121.694 75.6946 124.254 73.2115 125.744 71.3559C126.742 70.1137 128.543 69.8314 129.878 70.7515Z"
-                    fill="white"
-                  ></path>
-                  <path
-                    d="M43.3921 87.5078C42.9836 87.3619 42.7701 86.9134 42.916 86.5034C48.5393 70.7126 64.7471 61.0263 81.4156 63.6942C81.8441 63.7633 82.1359 64.1673 82.0683 64.5958C81.9977 65.0258 81.5861 65.3084 81.1668 65.2485C65.3337 62.7134 49.7976 71.8714 44.3966 87.0317C44.2491 87.4483 43.7867 87.6532 43.3921 87.5078Z"
-                    fill="#111"
-                  ></path>
-                  <path
-                    d="M101.669 139.097C101.234 139.087 100.892 138.726 100.903 138.291C100.913 137.858 101.319 137.511 101.709 137.525C116.36 137.893 132.299 138.175 144.202 128.707C144.546 128.438 145.039 128.494 145.308 128.833C145.578 129.174 145.521 129.669 145.182 129.939C132.979 139.642 116.678 139.481 101.669 139.097Z"
-                    fill="#111"
-                  ></path>
-                  <path
-                    d="M113.827 49.6081C110.302 46.4104 105.379 44.6856 100.603 44.9851C99.752 45.025 98.9887 44.3831 98.9334 43.5153C98.8781 42.6491 99.5355 41.9011 100.403 41.8458C106.072 41.4895 111.735 43.4615 115.94 47.2797C116.584 47.8633 116.631 48.857 116.048 49.5006C115.465 50.1432 114.471 50.1932 113.827 49.6081Z"
-                    fill="#111"
-                  ></path>
-                  <path
-                    d="M115.693 42.2542C113.229 37.9015 111.085 33.3216 109.321 28.6387C109.013 27.8262 109.425 26.9185 110.237 26.6129C111.048 26.3073 111.958 26.7173 112.263 27.5298C113.971 32.0606 116.046 36.4931 118.43 40.7029C118.858 41.4601 118.593 42.4185 117.837 42.847C117.069 43.279 116.115 42.9999 115.693 42.2542Z"
-                    fill="#111"
-                  ></path>
-                  <path
-                    d="M122.845 44.5045C120.663 38.6252 121.759 31.6432 125.641 26.7176C126.18 26.0388 127.17 25.9221 127.849 26.4565C128.531 26.9941 128.648 27.9832 128.11 28.6651C124.894 32.7474 123.983 38.5361 125.794 43.411C126.097 44.225 125.682 45.1296 124.867 45.4322C124.075 45.7298 123.153 45.3355 122.845 44.5045Z"
-                    fill="#111"
-                  ></path>
-                  <path
-                    d="M25.2762 132.285C20.1925 129.681 16.832 124.095 16.9134 118.385C16.9196 117.953 17.2698 117.609 17.6998 117.609H17.7105C18.1452 117.616 18.4923 117.973 18.4862 118.406C18.414 123.533 21.4304 128.548 25.9919 130.884C26.379 131.082 26.5326 131.557 26.3344 131.942C26.1316 132.337 25.6535 132.478 25.2762 132.285Z"
-                    fill="#111"
-                  ></path></svg
-              ></span>
-              <span class="text-heading-100 font-medium block mb-1">Drop or select file</span>
-              <span
-                >Drop file here or click
-                <span class="text-heading-100 font-medium">Browse</span> thorough your machine</span
-              >
-            </label>
-          </div>
-          <div class="grid gap-4 mt-4">
-            <div
-              v-if="upload.selectedCSV"
-              class="border border-border-100 rounded-md flex items-center justify-between p-3"
-            >
-              <div class="flex items-center gap-2">
-                <svg
-                  fill="currentColor"
-                  viewBox="0 0 256 256"
-                  class="h-6 w-6 mt-[1px]"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M48,180c0,11,7.18,20,16,20a14.24,14.24,0,0,0,10.22-4.66A8,8,0,0,1,85.78,206.4,30.06,30.06,0,0,1,64,216c-17.65,0-32-16.15-32-36s14.35-36,32-36a30.06,30.06,0,0,1,21.78,9.6,8,8,0,0,1-11.56,11.06A14.24,14.24,0,0,0,64,160C55.18,160,48,169,48,180Zm79.6-8.69c-4-1.16-8.14-2.35-10.45-3.84-1.25-.81-1.23-1-1.12-1.9a4.57,4.57,0,0,1,2-3.67c4.6-3.12,15.34-1.73,19.82-.56A8,8,0,0,0,142,145.86c-2.12-.55-21-5.22-32.84,2.76a20.58,20.58,0,0,0-9,14.95c-2,15.88,13.65,20.41,23,23.11,12.06,3.49,13.12,4.92,12.78,7.59-.31,2.41-1.26,3.34-2.14,3.93-4.6,3.06-15.17,1.56-19.55.36A8,8,0,0,0,109.94,214a61.34,61.34,0,0,0,15.19,2c5.82,0,12.3-1,17.49-4.46a20.82,20.82,0,0,0,9.19-15.23C154,179,137.49,174.17,127.6,171.31Zm83.09-26.84a8,8,0,0,0-10.23,4.84L188,184.21l-12.47-34.9a8,8,0,0,0-15.07,5.38l20,56a8,8,0,0,0,15.07,0l20-56A8,8,0,0,0,210.69,144.47ZM216,88v24a8,8,0,0,1-16,0V96H152a8,8,0,0,1-8-8V40H56v72a8,8,0,0,1-16,0V40A16,16,0,0,1,56,24h96a8,8,0,0,1,5.66,2.34l56,56A8,8,0,0,1,216,88Zm-27.31-8L160,51.31V80Z"
-                  ></path>
-                </svg>
-                <span class="block truncate">{{ upload.selectedCSV.name }}</span>
-              </div>
-              <span @click="upload.selectedCSV = null" class="cursor-pointer hover:text-danger-100"
-                ><Trash2 :size="20" :stroke-width="1.75"
-              /></span>
-            </div>
-            <input
-              type="text"
-              placeholder="Lead Source"
-              v-model="upload.leadSource"
-              class="border border-border-100 w-full h-11 outline-none px-4 text-heading-100 rounded-md"
-            />
-            <button
-              @click="uploadCSV"
-              :class="[
-                !upload.selectedCSV || !upload.leadSource ? 'pointer-events-none opacity-50' : '',
-              ]"
-              class="flex items-center justify-center gap-2 h-11 px-4 bg-primary-100 text-white-100 rounded-md leading-none transition-all duration-150 hover:brightness-125 font-medium"
-            >
-              <Upload :size="18" :stroke-width="1.75" />
-              Upload
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div
-      v-if="isLoading"
-      class="bg-opacity-40 fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-heading-100 text-white-100"
-    >
-      <LoaderCircle :size="50" :stroke-width="1" class="spin" />
-    </div>
-    <div
-      class="fixed bottom-4 right-0 z-[10000] transition-transform transform duration-300"
-      :class="[toast.active ? '-translate-x-4' : 'translate-x-full']"
-    >
-      <div
-        @click="disableToast"
-        class="rounded-lg p-5 min-w-[350px] max-w-[500px] flex items-center justify-between gap-5 cursor-pointer"
-        :class="[toast.type === 'error' ? 'bg-danger-100' : 'bg-success-100']"
-      >
-        <p class="text-[17px] font-medium text-white-100 drop-shadow-md">{{ toast.message }}</p>
-        <span class="block -mx-1 mt-[1px] text-white-100"
-          ><CircleX :size="20" :stroke-width="1.75"
-        /></span>
-      </div>
-    </div>
   </main>
 </template>
 
@@ -854,7 +614,6 @@ import {
   LoaderCircle,
   CircleX,
   Filter,
-  Upload,
   Download,
   ArrowRight,
   ArrowLeft,
@@ -863,6 +622,8 @@ import {
 import Topbar from '@/components/Topbar.vue'
 import ApiRequest from '@/libs/ApiRequest'
 import moment from 'moment'
+import { useLoaderStore } from '@/stores/loader'
+import { useToastStore } from '@/stores/toast'
 
 export default {
   components: {
@@ -876,20 +637,19 @@ export default {
     LoaderCircle,
     CircleX,
     Filter,
-    Upload,
     Download,
     ArrowRight,
     ArrowLeft,
     Trash2,
     Topbar,
   },
+  setup() {
+    const loaderStore = useLoaderStore()
+    const toastStore = useToastStore()
+    return { loaderStore, toastStore }
+  },
   data() {
     return {
-      toast: {
-        active: false,
-        message: '',
-        type: '',
-      },
       expandedRowId: null,
       stages: [
         {
@@ -920,12 +680,16 @@ export default {
       updateNoteModal: null,
       showTranscriptModal: null,
       currentCustomerToHanlde: {},
-      customers: {
-        data: [],
+      callsLogs: {
+        content: [],
+        dispositions: [],
+        empty: false,
+        first: true,
+        last: true,
+        totalPickupCalls: 0,
+        totalElements: 0,
       },
-      totalRecords: 0,
       currentPage: 0,
-      isLoading: false,
       dispositionFilter: [
         'Has Debt and Interested',
         'Has Debt and Not Interested',
@@ -948,60 +712,93 @@ export default {
       moreFilters: false,
       currentPediod: {
         label: 'Today',
-        value: 'today',
+        value: 1,
       },
       isActivePeriod: false,
       periods: [
         {
           label: 'Today',
-          value: 'today',
+          value: 1,
         },
         {
           label: 'Yesterday',
-          value: 'yesterday',
+          value: 2,
         },
         {
           label: 'Last 3 days',
-          value: 'last_three_days',
+          value: 3,
         },
         {
           label: 'Last 7 days',
-          value: 'last_seven_days',
+          value: 7,
+        },
+        {
+          label: 'All Time',
+          value: 0,
         },
       ],
       selectedDisposition: '',
-      selectedState: '',
-      selectedStage: '-1',
       debtAmount: '',
       selectedPayment: '',
       selectedDebt: '',
-      selectedLeadSource: '',
-      showUploadContactsModal: false,
-      upload: {
-        leadSource: '',
-        selectedCSV: null,
-      },
     }
   },
   mounted() {
-    this.loadCustomers()
+    this.loadCallLogs()
   },
   methods: {
-    async loadCustomers() {
-      this.isLoading = true
+    async loadCallLogs() {
+      this.loaderStore.setIsLoading(true)
       try {
         let queries = {
-          period: this.currentPediod.value,
+          page: this.currentPage,
+          days: this.currentPediod.value,
+          disposition: this.selectedDisposition ? this.selectedDisposition : false,
+          hasDebt: this.selectedDebt !== '' ? this.selectedDebt : '',
+          debtAmount: this.debtAmount ? this.debtAmount : false,
+          payment: this.selectedPayment ? this.selectedPayment : false,
+        }
+        if (queries.days === 0) {
+          delete queries.days
+        }
+        if (!queries.disposition) {
+          delete queries.disposition
+        }
+        if (queries.hasDebt === '') {
+          delete queries.hasDebt
+        }
+        if (!queries.debtAmount) {
+          delete queries.debtAmount
+        }
+        if (!queries.payment) {
+          delete queries.payment
         }
         queries = new URLSearchParams(queries).toString()
-        const { data } = await ApiRequest().get(`/call-history/get?${queries}`)
-        this.customers = data.data
-        this.totalRecords = data.data.totalRecords
+        const { data } = await ApiRequest().get(`/api/v1/calls/list?${queries}`)
+        this.callsLogs = data
       } catch (e) {
-        console.log(e)
+        this.toastStore.show(e, 'error')
       } finally {
-        this.isLoading = false
+        this.loaderStore.setIsLoading(false)
       }
+    },
+    filterCallsLogs() {
+      this.loadCallLogs()
+    },
+    clearCallsLogsFilter(type) {
+      if (type === 'disposition') {
+        this.selectedDisposition = ''
+      }
+      if (type === 'hasDebt') {
+        this.selectedDebt = ''
+      }
+      if (type === 'debtAmount') {
+        this.debtAmount = ''
+      }
+      if (type === 'payment') {
+        this.selectedPayment = ''
+      }
+      this.loadCallLogs()
     },
     toggleExpandedRow(id) {
       this.expandedRowId = this.expandedRowId === id ? null : id
@@ -1031,7 +828,7 @@ export default {
     },
     formatDate(value) {
       if (!value) return '-'
-      return moment(value).format('MM/DD/YYYY HH:mm')
+      return moment(value).format('MM/DD/YYYY')
     },
     formatDuration(value) {
       if (!value) return '-'
@@ -1060,77 +857,66 @@ export default {
       this.isActivePeriod = false
       this.currentPediod = this.periods.find((p) => p.value === period)
       this.currentPage = 0
-      this.loadCustomers()
+      this.loadCallLogs()
     },
-    exportCSV() {
-      const headers = [
-        'Time Called',
-        'Name',
-        'Business',
-        'Phone',
-        'State',
-        'Duration',
-        'Call Count',
-        'Weekly Payments',
-        'Has Debt',
-        'Total Debt',
-        'Advances',
-        'Disposition',
-        'Stage',
-      ]
-      const csv = []
-      csv.push(headers.join(','))
-      this.filteredCustomers.forEach((customer) => {
-        const row = {
-          dateTime: this.formatDate(customer.start_timestamp),
-          name: customer?.contact?.name || '-',
-          business: customer?.contact?.company || '-',
-          phone: customer?.contact?.phone || '-',
-          state: customer?.contact?.state || '-',
-          duration: this.formatDuration(customer.call_cost.total_duration_seconds),
-          callCount: 1,
-          weeklyPayments: customer?.call_analysis.custom_analysis_data?.hasOwnProperty(
-            'weekly_payments',
-          )
-            ? customer.call_analysis.custom_analysis_data.weekly_payments
-            : '-',
-          hasDebt: customer?.call_analysis.custom_analysis_data?.hasOwnProperty('has_debt')
-            ? customer.call_analysis.custom_analysis_data.has_debt
-            : '-',
-          TotalDebt: customer?.call_analysis.custom_analysis_data?.hasOwnProperty('total_debt')
-            ? customer.call_analysis.custom_analysis_data.total_debt
-            : '-',
-          TotalDebt: customer?.call_analysis.custom_analysis_data?.hasOwnProperty('advances')
-            ? customer.call_analysis.custom_analysis_data.advances
-            : '-',
-          Disposition: customer?.call_analysis.custom_analysis_data?.hasOwnProperty('disposition')
-            ? customer.call_analysis.custom_analysis_data.disposition
-            : '-',
-          Stage: '-',
-          // Stage: customer?.contact?.stage
-          //   ? this.stages.find((s) => s.key === customer.contact.stage).value
-          //   : '-',
+    async exportCSV() {
+      this.loaderStore.setIsLoading(true)
+      try {
+        let queries = {
+          page: this.currentPage,
+          days: this.currentPediod.value,
+          disposition: this.selectedDisposition ? this.selectedDisposition : false,
+          hasDebt: this.selectedDebt !== '' ? this.selectedDebt : '',
+          debtAmount: this.debtAmount ? this.debtAmount : false,
+          payment: this.selectedPayment ? this.selectedPayment : false,
         }
-        csv.push(Object.values(row).join(','))
-      })
-      const csvString = csv.join('\n')
-      const link = document.createElement('a')
-      link.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csvString)
-      link.download = 'data.csv'
-      link.click()
+        if (queries.days === 0) {
+          delete queries.days
+        }
+        if (!queries.disposition) {
+          delete queries.disposition
+        }
+        if (queries.hasDebt === '') {
+          delete queries.hasDebt
+        }
+        if (!queries.debtAmount) {
+          delete queries.debtAmount
+        }
+        if (!queries.payment) {
+          delete queries.payment
+        }
+        queries = new URLSearchParams(queries).toString()
+        const { data } = await ApiRequest().get(`/api/v1/calls/export?${queries}`)
+        if (data) {
+          const csv = data
+          const blob = new Blob([csv], { type: 'text/csv' })
+          const url = window.URL.createObjectURL(blob)
+          const a = document.createElement('a')
+          a.setAttribute('hidden', '')
+          a.setAttribute('href', url)
+          a.setAttribute('download', 'data.csv')
+          document.body.appendChild(a)
+          a.click()
+          window.URL.revokeObjectURL(url)
+          document.body.removeChild(a)
+          this.toastStore.show('CSV file exported successfully!', 'success')
+        }
+      } catch (e) {
+        this.toastStore.show(e, 'error')
+      } finally {
+        this.loaderStore.setIsLoading(false)
+      }
     },
     clearFilters() {
       this.selectedDisposition = ''
-      this.selectedState = ''
-      this.selectedStage = '-1'
       this.debtAmount = ''
       this.selectedPayment = ''
       this.selectedDebt = ''
-      this.selectedLeadSource = ''
       this.moreFilters = false
+      this.loadCallLogs()
     },
     async updateNotesOrStage(type, id, value) {
-      this.isLoading = true
+      this.loaderStore.setIsLoading(true)
       try {
         const payload = {}
         if (type === 'notes') {
@@ -1162,197 +948,23 @@ export default {
               type: 'success',
             }
           }
-          this.loadCustomers()
+          this.loadCallLogs()
         }
       } catch (e) {
-        console.log(e)
+        this.toastStore.show(e, 'error')
       } finally {
-        this.isLoading = false
-      }
-    },
-    disableToast() {
-      this.toast = {
-        show: false,
-        message: '',
-        type: '',
-      }
-    },
-    closeUploadContactsModal() {
-      this.showUploadContactsModal = false
-      this.upload = {
-        selectedCSV: null,
-        leadSource: '',
-      }
-    },
-    handleFileUpload(event) {
-      const file = event.target.files[0]
-      if (!file) {
-        this.upload.selectedCSV = null
-        return
-      }
-      if (!file.name.toLowerCase().endsWith('.csv')) {
-        this.toast = {
-          active: true,
-          message: 'Please upload only CSV files',
-          type: 'error',
-        }
-        this.upload.selectedCSV = null
-        return
-      }
-      this.upload.selectedCSV = file
-    },
-    async uploadCSV() {
-      this.isLoading = true
-      try {
-        const payload = {
-          file: this.upload.selectedCSV,
-          lead_source: this.upload.leadSource,
-        }
-        const { data } = await ApiRequest().post(`/upload/admin1`, payload, {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-        })
-        if (data) {
-          this.toast = {
-            active: true,
-            message:
-              data.data === 'No valid contacts found in the upload' ? data.data : data.message,
-            type: data.data === 'No valid contacts found in the upload' ? 'error' : 'success',
-          }
-          this.closeUploadContactsModal()
-        }
-      } catch (e) {
-        console.log(e)
-      } finally {
-        this.isLoading = false
+        this.loaderStore.setIsLoading(false)
       }
     },
     prevPage() {
-      if (this.currentPage > 0) {
-        this.currentPage--
-      }
+      this.currentPage -= 1
+      this.loadCallLogs()
     },
     nextPage() {
-      if (this.currentPage < this.totalPages - 1) {
-        this.currentPage++
-      }
+      this.currentPage += 1
+      this.loadCallLogs()
     },
   },
-  computed: {
-    filteredCustomersPaginated() {
-      const items = this.customers.data.filter((customer) => {
-        // Disposition filter
-        const dispositionMatch =
-          !this.selectedDisposition ||
-          (customer.call_analysis?.custom_analysis_data?.hasOwnProperty('disposition') &&
-            customer.call_analysis.custom_analysis_data.disposition === this.selectedDisposition)
-
-        // States filter
-        const stateMatch = !this.selectedState || customer.contact.state === this.selectedState
-
-        // Has Debt filter
-        const hasDebtMatch =
-          !this.selectedDebt ||
-          (customer.call_analysis?.custom_analysis_data?.hasOwnProperty('has_debt') &&
-            customer.call_analysis.custom_analysis_data.has_debt === this.selectedDebt)
-
-        // Stage filter
-        const stageMatch =
-          this.selectedStage === '-1' || customer.contact.stage === this.selectedStage
-
-        // Debt Amount filter
-        const debtAmountMatch =
-          !this.debtAmount ||
-          (customer.call_analysis?.custom_analysis_data?.hasOwnProperty('total_debt') &&
-            customer.call_analysis.custom_analysis_data.total_debt === this.debtAmount)
-
-        // Payemnt filter
-        const paymentMatch =
-          !this.selectedPayment ||
-          (customer.call_analysis?.custom_analysis_data?.hasOwnProperty('weekly_payments') &&
-            customer.call_analysis.custom_analysis_data.weekly_payments === this.selectedPayment)
-
-        // Lead Sourcce filter
-        const leadSourceMatch =
-          !this.selectedLeadSource || customer.contact.lead_source === this.selectedLeadSource
-
-        // Combine all filters
-        return (
-          dispositionMatch &&
-          stateMatch &&
-          hasDebtMatch &&
-          stageMatch &&
-          debtAmountMatch &&
-          paymentMatch &&
-          leadSourceMatch
-        )
-      })
-      this.totalRecords = items.length
-      const start = this.currentPage * 20
-      const end = start + 20
-      return items.slice(start, end)
-    },
-    filteredCustomers() {
-      return this.customers.data.filter((customer) => {
-        // Disposition filter
-        const dispositionMatch =
-          !this.selectedDisposition ||
-          (customer.call_analysis?.custom_analysis_data?.hasOwnProperty('disposition') &&
-            customer.call_analysis.custom_analysis_data.disposition === this.selectedDisposition)
-
-        // States filter
-        const stateMatch = !this.selectedState || customer.contact.state === this.selectedState
-
-        // Has Debt filter
-        const hasDebtMatch =
-          !this.selectedDebt ||
-          (customer.call_analysis?.custom_analysis_data?.hasOwnProperty('has_debt') &&
-            customer.call_analysis.custom_analysis_data.has_debt === this.selectedDebt)
-
-        // Stage filter
-        const stageMatch =
-          this.selectedStage === '-1' || customer.contact.stage === this.selectedStage
-
-        // Debt Amount filter
-        const debtAmountMatch =
-          !this.debtAmount ||
-          (customer.call_analysis?.custom_analysis_data?.hasOwnProperty('total_debt') &&
-            customer.call_analysis.custom_analysis_data.total_debt === this.debtAmount)
-
-        // Payemnt filter
-        const paymentMatch =
-          !this.selectedPayment ||
-          (customer.call_analysis?.custom_analysis_data?.hasOwnProperty('weekly_payments') &&
-            customer.call_analysis.custom_analysis_data.weekly_payments === this.selectedPayment)
-
-        // Lead Sourcce filter
-        const leadSourceMatch =
-          !this.selectedLeadSource || customer.contact.lead_source === this.selectedLeadSource
-
-        // Combine all filters
-        return (
-          dispositionMatch &&
-          stateMatch &&
-          hasDebtMatch &&
-          stageMatch &&
-          debtAmountMatch &&
-          paymentMatch &&
-          leadSourceMatch
-        )
-      })
-    },
-    totalCalls() {
-      return this.customers.data.length
-    },
-    connectedCalls() {
-      return this.customers.data.filter((customer) => {
-        return this.disconnectionReasonFilter.includes(customer.disconnection_reason)
-      }).length
-    },
-    totalPages() {
-      return Math.ceil(this.totalRecords / 20)
-    },
-  },
+  computed: {},
 }
 </script>

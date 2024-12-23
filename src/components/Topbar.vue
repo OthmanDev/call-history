@@ -107,6 +107,12 @@
         <div class="grid gap-4">
           <input
             type="text"
+            placeholder="Enter Retellai Key"
+            v-model="retellaiKey"
+            class="border border-border-100 w-full h-11 outline-none px-4 text-heading-100 rounded-md"
+          />
+          <input
+            type="text"
             placeholder="Enter Workspace Name"
             v-model="newWorkspaceName"
             class="border border-border-100 w-full h-11 outline-none px-4 text-heading-100 rounded-md"
@@ -114,6 +120,7 @@
           <button
             @click="createWorkspace"
             class="flex items-center justify-center gap-2 h-11 px-4 bg-primary-100 text-white-100 rounded-md leading-none transition-all duration-150 hover:brightness-125 font-medium"
+            :class="!newWorkspaceName || !retellaiKey ? 'opacity-50 pointer-events-non' : ''"
           >
             <Plus :size="18" :stroke-width="1.75" />
             Create Workspace
@@ -127,11 +134,16 @@
 <script>
 import { UserCircle, LogOut, Users, Building, Plus, Network, X } from 'lucide-vue-next'
 import { useUserStore } from '@/stores/user'
+import { useToastStore } from '@/stores/toast'
+import { useLoaderStore } from '@/stores/loader'
 import { SignOutButton } from '@clerk/vue'
+import ApiRequest from '@/libs/ApiRequest'
 export default {
   setup() {
     const userStore = useUserStore()
-    return { userStore }
+    const toastStore = useToastStore()
+    const loaderStore = useLoaderStore()
+    return { userStore, toastStore, loaderStore }
   },
   props: {
     title: {
@@ -154,29 +166,8 @@ export default {
       isCollapsed: false,
       isAddOpen: false,
       newWorkspaceName: '',
-      workspaces: [
-        {
-          id: 1,
-          name: 'Talkforce AI',
-          accounts: 3,
-          seats: 10,
-          isOwner: true,
-        },
-        {
-          id: 2,
-          name: 'Sales Team',
-          accounts: 5,
-          seats: 15,
-          isOwner: false,
-        },
-        {
-          id: 3,
-          name: 'Support Division',
-          accounts: 2,
-          seats: 5,
-          isOwner: false,
-        },
-      ],
+      retellaiKey: '',
+      workspaces: [],
     }
   },
   directives: {
@@ -195,6 +186,7 @@ export default {
     },
   },
   mounted() {
+    this.getWorkspaces()
     window.addEventListener('isCollapsed', (event) => {
       this.isCollapsed = event.detail.isCollapsed
     })
@@ -218,18 +210,33 @@ export default {
       this.isAddOpen = false
       this.newWorkspaceName = ''
     },
-    createWorkspace() {
-      console.log('Creating workspace:', this.newWorkspaceName)
-      this.closeAddWorkspace()
+    async getWorkspaces() {
+      try {
+        const { data } = await ApiRequest().get(`/api/v1/workspaces/list`)
+        this.workspaces = data
+      } catch (e) {
+        console.error(e)
+      }
     },
-    async handleSignOut() {
-      // try {
-      //   await this.$clerk.signOut()
-      //   // Optionally redirect after sign out
-      //   this.$router.push('/signin')
-      // } catch (error) {
-      //   console.error('Error signing out:', error)
-      // }
+    async createWorkspace() {
+      this.loaderStore.setIsLoading(true)
+      try {
+        if (!this.newWorkspaceName || !this.retellaiKey) {
+          this.toastStore.show('Please fill all the fields', 'error')
+          return
+        }
+        const payload = {
+          name: this.newWorkspaceName,
+          retellaiKey: this.retellaiKey,
+        }
+        await ApiRequest().post(`/api/v1/workspaces/create`, payload)
+        this.closeAddWorkspace()
+        this.toastStore.show('Workspace created successfully', 'success')
+      } catch (e) {
+        this.toastStore.show(e, 'error')
+      } finally {
+        this.loaderStore.setIsLoading(false)
+      }
     },
   },
 }

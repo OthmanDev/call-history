@@ -6,7 +6,12 @@ export const useUserStore = defineStore('user', {
     user = user ? user : {}
     return {
       user: user,
-      token: ''
+      token: '',
+      toast: {
+        show: false,
+        message: '',
+        type: '',
+      },
     }
   },
   actions: {
@@ -16,6 +21,14 @@ export const useUserStore = defineStore('user', {
     },
     setToken(token) {
       this.token = token
+    },
+    showToast(message, type) {
+      this.toast.show = true
+      this.toast.message = message
+      this.toast.type = type
+    },
+    hideToast() {
+      this.toast.show = false
     },
   },
 })

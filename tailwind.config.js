@@ -33,6 +33,9 @@ export default {
         },
       },
     },
+    maxHeight: {
+      modal: 'calc(100vh - 200px)'
+    },
     screens: {
       '2xl': { max: '1450px' },
       xl: { max: '1279px' },
