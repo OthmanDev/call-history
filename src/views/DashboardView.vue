@@ -4,7 +4,7 @@
     <div class="p-6 flex flex-col gap-6">
       <div class="border border-border-100 rounded-xl bg-white-100 p-6">
         <h2 class="capitalize text-heading-100 font-bold text-3xl">
-          Welcome back Greg
+          Welcome back {{ useStore?.fullName }}
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" class="inline-flex h-8 w-8">
             <path
               fill="#fac036"
@@ -41,8 +41,8 @@
 
 <script>
 import { SignedIn, SignedOut, SignInButton, UserButton, SignOutButton } from '@clerk/vue'
-
 import Topbar from '@/components/Topbar.vue'
+import { useUserStore } from '@/stores/user'
 export default {
   components: {
     Topbar,
@@ -51,6 +51,10 @@ export default {
     SignInButton,
     UserButton,
     SignOutButton,
+  },
+  setup() {
+    const useStore = useUserStore()
+    return { useStore }
   },
 }
 </script>

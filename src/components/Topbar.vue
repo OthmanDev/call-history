@@ -36,9 +36,11 @@
             class="absolute right-0 border border-border-100 rounded-md bg-white-100 z-10 top-full mt-1 w-[260px]"
           >
             <div class="p-4 grid gap-3">
-              <div class="font-medium text-heading-100">Your Workspaces</div>
-              <div class="border-t border-border-100"></div>
-              <div class="grid gap-3">
+              <div class="font-medium text-heading-100">
+                {{ workspaces.length > 0 ? 'Your Workspaces' : 'No Workspaces' }}
+              </div>
+              <div v-if="workspaces.length > 0" class="border-t border-border-100"></div>
+              <div v-if="workspaces.length > 0" class="grid gap-3">
                 <div v-for="workspace in workspaces" :key="workspace.id" class="cursor-pointer">
                   <div class="flex flex-col w-full">
                     <div class="flex justify-between items-center">
@@ -69,6 +71,7 @@
                 <span class="flex-1 pt-[1px]">Add Workspace</span>
               </div>
               <div
+                v-if="false"
                 class="text-heading-100 flex items-center gap-2 transition-all hover:text-primary-100 rounded-md cursor-pointer"
               >
                 <span><Network :size="20" :stroke-width="1.75" /></span>
