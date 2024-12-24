@@ -6,7 +6,7 @@
         <div class="border-b border-border-100 p-4">
           <div class="flex items-center justify-between">
             <div>
-              <span class="text-lg font-bold text-heading-100 block">Q1 Seller Outreach</span>
+              <span class="text-lg font-semibold text-heading-100 block">Q1 Seller Outreach</span>
               <p class="">Campaign started March 15, 2024</p>
             </div>
             <button

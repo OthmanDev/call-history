@@ -6,7 +6,7 @@
         <div class="border-b border-border-100 p-4">
           <div class="flex items-center justify-between">
             <div>
-              <span class="text-lg font-bold text-heading-100 block">Phone Numbers</span>
+              <span class="text-lg font-semibold text-heading-100 block">Phone Numbers</span>
               <p>Manage your phone numbers and their configurations</p>
             </div>
             <button
@@ -18,7 +18,7 @@
             </button>
           </div>
         </div>
-        <div class="p-4">
+        <div v-if="phoneNumbers.length > 0" class="p-4">
           <div class="grid gap-4">
             <div
               v-for="(number, key) in phoneNumbers"
@@ -28,7 +28,9 @@
               <div class="border-b border-border-100 p-4">
                 <div class="flex items-start justify-between">
                   <div>
-                    <h2 class="text-lg font-bold text-primary-100">{{ number.phone_number_pretty }}</h2>
+                    <h2 class="text-lg font-bold text-primary-100">
+                      {{ number.phone_number_pretty }}
+                    </h2>
                     <p class="text-sm">ID: {{ number.phone_number }}</p>
                   </div>
                   <button
@@ -47,12 +49,16 @@
                       <label class="text-[15px] mb-1 font-medium block">Inbound call agent</label>
                       <div class="relative flex items-center border border-border-100 rounded-md">
                         <select
-                          v-model="number.inboundAgent"
                           class="w-full h-11 outline-none px-4 appearance-none cursor-pointer text-heading-100 rounded-md"
                         >
-                          <option value="none">None (disable inbound)</option>
-                          <option value="support">Support Team</option>
-                          <option value="sales">Sales Team</option>
+                          <option
+                            :value="agent.agent_name"
+                            v-for="(agent, key) in agents"
+                            :key="key"
+                            :selected="agent.agent_id === number?.inbound_agent_id"
+                          >
+                            {{ agent.agent_name }}
+                          </option>
                         </select>
                         <span
                           class="absolute top-0 right-0 bottom-0 w-[40px] bg-white-100 pointer-events-none flex items-center justify-center rounded-tr-md rounded-br-md"
@@ -65,12 +71,16 @@
                       <label class="text-[15px] mb-1 font-medium block">Outbound call agent</label>
                       <div class="relative flex items-center border border-border-100 rounded-md">
                         <select
-                          v-model="number.outboundAgent"
                           class="w-full h-11 outline-none px-4 appearance-none cursor-pointer text-heading-100 rounded-md"
                         >
-                          <option value="mendez">mendez grp</option>
-                          <option value="support">Support Team</option>
-                          <option value="sales">Sales Team</option>
+                          <option
+                            :value="agent.agent_name"
+                            v-for="(agent, key) in agents"
+                            :key="key"
+                            :selected="agent.agent_id === number.outbound_agent_id"
+                          >
+                            {{ agent.agent_name }}
+                          </option>
                         </select>
                         <span
                           class="absolute top-0 right-0 bottom-0 w-[40px] bg-white-100 pointer-events-none flex items-center justify-center rounded-tr-md rounded-br-md"
@@ -162,6 +172,7 @@ export default {
     return { loaderStore }
   },
   mounted() {
+    this.getAgents()
     this.getPhoneNumbers()
   },
   data() {
@@ -192,6 +203,7 @@ export default {
           hasBrandedCalls: false,
         },
       ],
+      agents: [],
     }
   },
   methods: {
@@ -200,6 +212,17 @@ export default {
       try {
         const { data } = await ApiRequest().get(`/api/v1/numbers/list`)
         this.phoneNumbers = data
+      } catch (e) {
+        console.error(e)
+      } finally {
+        this.loaderStore.setIsLoading(false)
+      }
+    },
+    async getAgents() {
+      this.loaderStore.setIsLoading(true)
+      try {
+        const { data } = await ApiRequest().get(`/api/v1/agents/list`)
+        this.agents = data
       } catch (e) {
         console.error(e)
       } finally {
@@ -219,6 +242,12 @@ export default {
     toggleBrandedCalls(number) {
       number.hasBrandedCalls = !number.hasBrandedCalls
       console.log('Toggling branded calls for:', number.number)
+    },
+  },
+  computed: {
+    outboundCallAgent() {
+      return this.agents.find((agent) => agent.agent_id === this.phoneNumbers[0].outbound_agent_id)
+        ?.agent_name
     },
   },
 }

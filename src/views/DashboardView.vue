@@ -4,7 +4,7 @@
     <div class="p-6 flex flex-col gap-6">
       <div class="border border-border-100 rounded-xl bg-white-100 p-6">
         <h2 class="capitalize text-heading-100 font-bold text-3xl">
-          Welcome back {{ useStore?.fullName }}
+          Welcome back {{ useStore.user?.fullName }}
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" class="inline-flex h-8 w-8">
             <path
               fill="#fac036"
@@ -28,14 +28,150 @@
         <p class="text-[17px] mt-4">
           Here’s What happening on your dashboard today. See the insights at once.
         </p>
-        <div v-if="workspacesStore.workspaces.length === 0" class="mt-4">
+        <div class="mt-4 flex items-center gap-2">
           <button
             @click="isAddOpen = true"
             class="flex items-center gap-2 h-11 px-4 bg-primary-100 text-white-100 rounded-md leading-none transition-all duration-150 hover:brightness-125 font-medium"
           >
             <Plus :size="18" :stroke-width="1.75" />
-            Add a workspace to continue
+            Create Workspace
           </button>
+          <RouterLink
+            :to="{ name: 'campaign-wizard' }"
+            class="flex items-center gap-2 h-11 px-4 bg-primary-100 text-white-100 rounded-md leading-none transition-all duration-150 hover:brightness-125 font-medium"
+          >
+            <Plus :size="18" :stroke-width="1.75" />
+            Create Outbound Calling Campaign
+          </RouterLink>
+          <button
+            @click="showUploadContactsModal = true"
+            class="flex items-center gap-2 h-11 px-4 bg-primary-100 text-white-100 rounded-md leading-none transition-all duration-150 hover:brightness-125 font-medium"
+          >
+            <Upload :size="18" :stroke-width="1.75" />
+            Import Contacts
+          </button>
+        </div>
+      </div>
+      <div class="border border-border-100 rounded-xl bg-white-100">
+        <div class="border-b border-border-100 p-4">
+          <span class="text-lg font-semibold text-heading-100">Outbound calling performance</span>
+        </div>
+        <div class="p-4">
+          <div class="grid grid-cols-5 gap-4">
+            <div class="border border-border-100 rounded-xl bg-white-100 p-4">
+              <div class="text-2xl font-bold text-heading-100 mb-1 uppercase">4200</div>
+              <div class="text-[17px] capitalize">Total Calls Made</div>
+            </div>
+            <div class="border border-border-100 rounded-xl bg-white-100 p-4">
+              <div class="text-2xl font-bold text-heading-100 mb-1 uppercase">32%</div>
+              <div class="text-[17px] capitalize">Call Answer Rate</div>
+            </div>
+            <div class="border border-border-100 rounded-xl bg-white-100 p-4">
+              <div class="text-2xl font-bold text-heading-100 mb-1 uppercase">10%</div>
+              <div class="text-[17px] capitalize">Action Rate</div>
+            </div>
+            <div class="border border-border-100 rounded-xl bg-white-100 p-4">
+              <div class="text-2xl font-bold text-heading-100 mb-1 uppercase">6%</div>
+              <div class="text-[17px] capitalize">Follow-Up Conversion</div>
+            </div>
+            <div class="border border-border-100 rounded-xl bg-white-100 p-4">
+              <div class="text-2xl font-bold text-heading-100 mb-1 uppercase">96%</div>
+              <div class="text-[17px] capitalize">Compliance Rate</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="flex items-start justify-between gap-6">
+        <div class="w-[400px] h-[340px]">
+          <div
+            class="border border-border-100 rounded-xl bg-white-100 h-full flex flex-col justify-between"
+          >
+            <div class="border-b border-border-100 p-4">
+              <span class="text-lg font-semibold text-heading-100">Contacts</span>
+            </div>
+            <div class="p-6 flex-1 flex items-center justify-center flex-col">
+              <div class="text-center">
+                <div class="text-2xl font-bold text-heading-100 mb-1 uppercase">4200</div>
+                <div class="text-[17px] capitalize">Current Contatcs</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="flex-1">
+          <div class="border border-border-100 rounded-xl bg-white-100">
+            <div class="border-b border-border-100 p-4">
+              <div class="flex items-center justify-between">
+                <span class="text-lg font-semibold text-heading-100">Recent campaigns</span>
+                <RouterLink
+                  to="/campaigns"
+                  class="flex items-center gap-2 h-11 px-4 bg-primary-100 text-white-100 rounded-md leading-none transition-all duration-150 hover:brightness-125 font-medium"
+                >
+                  <Aperture :size="18" :stroke-width="1.75" />
+                  See All Campaigns
+                </RouterLink>
+              </div>
+            </div>
+            <div class="overflow-hidden">
+              <div class="max-w-full overflow-x-auto without-scrollbar">
+                <table class="w-full">
+                  <thead>
+                    <tr class="bg-[#F8F7FA] border-b border-border-100">
+                      <th
+                        class="p-3 text-left text-heading-100 text-[15px] capitalize font-semibold"
+                      >
+                        Name
+                      </th>
+                      <th
+                        class="p-3 text-left text-heading-100 text-[15px] capitalize font-semibold"
+                      >
+                        Lead source
+                      </th>
+                      <th
+                        class="p-3 text-left text-heading-100 text-[15px] capitalize font-semibold"
+                      >
+                        Recipients
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody class="divide-y divide-border-100">
+                    <tr class="cursor-pointer hover:bg-[#F8F7FA] hover:bg-opacity-20">
+                      <td class="p-3 text-left font-medium text-[15px]">Q1 Seller Outreach</td>
+                      <td class="p-3 text-left font-medium text-[15px]">-</td>
+                      <td class="p-3 text-left font-medium text-[15px]">2,500</td>
+                    </tr>
+                    <tr class="cursor-pointer hover:bg-[#F8F7FA] hover:bg-opacity-20">
+                      <td class="p-3 text-left font-medium text-[15px]">
+                        February Buyer Follow-up
+                      </td>
+                      <td class="p-3 text-left font-medium text-[15px]">-</td>
+                      <td class="p-3 text-left font-medium text-[15px]">1,800</td>
+                    </tr>
+                    <tr class="cursor-pointer hover:bg-[#F8F7FA] hover:bg-opacity-20">
+                      <td class="p-3 text-left font-medium text-[15px]">
+                        February Buyer Follow-up
+                      </td>
+                      <td class="p-3 text-left font-medium text-[15px]">-</td>
+                      <td class="p-3 text-left font-medium text-[15px]">1,800</td>
+                    </tr>
+                    <tr class="cursor-pointer hover:bg-[#F8F7FA] hover:bg-opacity-20">
+                      <td class="p-3 text-left font-medium text-[15px]">
+                        February Buyer Follow-up
+                      </td>
+                      <td class="p-3 text-left font-medium text-[15px]">-</td>
+                      <td class="p-3 text-left font-medium text-[15px]">1,800</td>
+                    </tr>
+                    <tr class="cursor-pointer hover:bg-[#F8F7FA] hover:bg-opacity-20">
+                      <td class="p-3 text-left font-medium text-[15px]">
+                        February Buyer Follow-up
+                      </td>
+                      <td class="p-3 text-left font-medium text-[15px]">-</td>
+                      <td class="p-3 text-left font-medium text-[15px]">1,800</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
       <!-- <SignedIn>
@@ -46,14 +182,20 @@
       </SignedOut> -->
     </div>
   </main>
+  <UploadContacts
+    v-if="showUploadContactsModal"
+    @closeUploadContactsModal="closeUploadContactsModal"
+    @loadContacts="() => {}"
+  />
   <CreateWorkspace v-if="isAddOpen" @closeAddWorkspace="closeAddWorkspace" />
 </template>
 
 <script>
 import { SignedIn, SignedOut, SignInButton, UserButton, SignOutButton } from '@clerk/vue'
-import { Plus } from 'lucide-vue-next'
+import { Plus, Upload, Aperture } from 'lucide-vue-next'
 import Topbar from '@/components/Topbar.vue'
 import CreateWorkspace from '@/components/CreateWorkspace.vue'
+import UploadContacts from '@/components/UploadContacts.vue'
 import { useUserStore } from '@/stores/user'
 import { useWorkspacesStore } from '@/stores/workspaces'
 
@@ -66,7 +208,10 @@ export default {
     UserButton,
     SignOutButton,
     Plus,
+    Upload,
+    Aperture,
     CreateWorkspace,
+    UploadContacts,
   },
   setup() {
     const useStore = useUserStore()
@@ -76,11 +221,15 @@ export default {
   data() {
     return {
       isAddOpen: false,
+      showUploadContactsModal: false,
     }
   },
   methods: {
     closeAddWorkspace() {
       this.isAddOpen = false
+    },
+    closeUploadContactsModal() {
+      this.showUploadContactsModal = false
     },
   },
 }

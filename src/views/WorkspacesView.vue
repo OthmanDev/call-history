@@ -5,7 +5,7 @@
       <div class="rounded-xl bg-white-100 border border-border-100 overflow-hidden">
         <div class="border-b border-border-100 p-4">
           <div class="flex items-center justify-between">
-            <span class="text-lg font-bold text-heading-100">Workspaces</span>
+            <span class="text-lg font-semibold text-heading-100">Workspaces</span>
             <button
               @click="isAddOpen = true"
               class="flex items-center gap-2 h-11 px-4 bg-primary-100 text-white-100 rounded-md leading-none transition-all duration-150 hover:brightness-125 font-medium"
@@ -20,7 +20,7 @@
             <div
               v-for="(workspace, key) in workspaces"
               :key="key"
-              class="border border-border-100 rounded-md p-4 flex items-center justify-between"
+              class="border border-border-100 rounded-xl p-4 flex items-center justify-between"
             >
               <div class="flex items-center gap-2">
                 <span class="text-heading-100 font-medium">{{ workspace.name }}</span>
@@ -30,9 +30,21 @@
                   >Default</span
                 >
               </div>
-              <span class="cursor-pointer hover:text-danger-100"
-                ><Trash2 :size="20" :stroke-width="1.75"
-              /></span>
+              <div class="flex items-center gap-1">
+                <span
+                  v-if="!workspace.default"
+                  title="Set as default"
+                  @click="setWorkspaceAsDefault(workspace.uid)"
+                  class="cursor-pointer hover:text-success-100"
+                  ><CircleCheck :size="20" :stroke-width="1.75"
+                /></span>
+                <span
+                  title="Delete"
+                  @click="deleteWorkspace(workspace.uid)"
+                  class="cursor-pointer hover:text-danger-100"
+                  ><Trash2 :size="20" :stroke-width="1.75"
+                /></span>
+              </div>
             </div>
           </div>
         </div>
@@ -95,11 +107,12 @@
 </template>
 
 <script>
-import { Plus, Trash2 } from 'lucide-vue-next'
+import { Plus, Trash2, CircleCheck } from 'lucide-vue-next'
 import Topbar from '@/components/Topbar.vue'
 import CreateWorkspace from '@/components/CreateWorkspace.vue'
 import { useWorkspacesStore } from '@/stores/workspaces'
 import { useLoaderStore } from '@/stores/loader'
+import { useToastStore } from '@/stores/toast'
 import ApiRequest from '@/libs/ApiRequest'
 
 export default {
@@ -108,11 +121,13 @@ export default {
     Plus,
     CreateWorkspace,
     Trash2,
+    CircleCheck,
   },
   setup() {
     const workspacesStore = useWorkspacesStore()
     const loaderStore = useLoaderStore()
-    return { workspacesStore, loaderStore }
+    const toastStore = useToastStore()
+    return { workspacesStore, loaderStore, toastStore }
   },
   data() {
     return {
@@ -138,6 +153,30 @@ export default {
         this.workspacesStore.setWorkspaces(data)
       } catch (e) {
         console.error(e)
+      } finally {
+        this.loaderStore.setIsLoading(false)
+      }
+    },
+    async deleteWorkspace(uid) {
+      this.loaderStore.setIsLoading(true)
+      try {
+        const { data } = await ApiRequest().delete(`/api/v1/workspaces/delete/${uid}`)
+        this.toastStore.show('Workspace deleted successfully', 'success')
+        this.getWorkspaces()
+      } catch (e) {
+        this.toastStore.show(e, 'error')
+      } finally {
+        this.loaderStore.setIsLoading(false)
+      }
+    },
+    async setWorkspaceAsDefault(uid) {
+      this.loaderStore.setIsLoading(true)
+      try {
+        const { data } = await ApiRequest().get(`/api/v1/workspaces/default/${uid}`)
+        this.toastStore.show('Workspace seted as default successfully', 'success')
+        this.getWorkspaces()
+      } catch (e) {
+        this.toastStore.show(e, 'error')
       } finally {
         this.loaderStore.setIsLoading(false)
       }

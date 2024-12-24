@@ -145,7 +145,9 @@ export default {
     }
   },
   mounted() {
-    this.getWorkspaces()
+    setTimeout(() => {
+      this.getWorkspaces()
+    })
     window.addEventListener('collapseSidebar', (event) => {
       this.isCollapsed = event.detail.isCollapsed
     })

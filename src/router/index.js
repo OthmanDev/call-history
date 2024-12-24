@@ -30,7 +30,7 @@ const router = createRouter({
       },
     },
     {
-      path: '/campaign-wizard',
+      path: '/campaigns/add',
       name: 'campaign-wizard',
       component: () => import('@/views/CampaignWizardView.vue'),
       meta: {

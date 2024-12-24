@@ -95,7 +95,7 @@
       <div class="rounded-xl bg-white-100 border border-border-100 overflow-hidden">
         <div class="border-b border-border-100 p-4">
           <div class="flex items-center justify-between">
-            <span class="text-lg font-bold text-heading-100">Call Logs</span>
+            <span class="text-lg font-semibold text-heading-100">Call Logs</span>
             <div class="flex items-center gap-2">
               <button
                 @click="moreFilters = !moreFilters"

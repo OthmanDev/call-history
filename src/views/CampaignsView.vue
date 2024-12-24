@@ -179,22 +179,19 @@ export default {
     return {
       currentTab: 'active',
       searchQuery: '',
-
       tabs: [
         { value: 'active', label: 'Active' },
         { value: 'archived', label: 'Archived' },
       ],
-
       tableHeaders: [
-        { key: 'name', label: 'Campaign Name', align: 'text-left' },
-        { key: 'date', label: 'Date Sent', align: 'text-left' },
-        { key: 'recipients', label: 'Recipients', align: 'text-right' },
-        { key: 'pickups', label: 'Pickups', align: 'text-right' },
-        { key: 'successful', label: 'Successful', align: 'text-right' },
-        { key: 'prospects', label: 'Prospects', align: 'text-right' },
-        { key: 'status', label: 'Status', align: 'text-right' },
+        { key: 'name', label: 'Name' },
+        { key: 'date', label: 'Date Sent' },
+        { key: 'recipients', label: 'Recipients' },
+        { key: 'pickups', label: 'Pickups' },
+        { key: 'successful', label: 'Successful' },
+        { key: 'prospects', label: 'Prospects' },
+        { key: 'status', label: 'Status' },
       ],
-
       campaigns: [
         {
           id: 1,
@@ -215,7 +212,6 @@ export default {
           totalProspects: 145,
         },
       ],
-
       statsCards: [
         {
           title: "Today's Calls",
@@ -235,20 +231,16 @@ export default {
       ],
     }
   },
-
   methods: {
     formatDate(date) {
       return new Date(date).toLocaleDateString()
     },
-
     formatNumber(number) {
       return number.toLocaleString()
     },
-
     toggleFilters() {
       console.log('Toggling filters')
     },
-
     viewCampaign(campaign) {
       this.$router.push({ name: 'campaign-details', params: { id: campaign.id } })
     },

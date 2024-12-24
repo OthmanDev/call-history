@@ -54,7 +54,7 @@
                       <span class="font-medium text-heading-100 text-[15px]">{{
                         workspace.name
                       }}</span>
-                      <span v-if="workspace.isOwner" class="text-sm">Owner</span>
+                      <span v-if="workspace.default" class="text-sm">Default</span>
                     </div>
                     <div class="flex items-center gap-4 mt-1.5">
                       <span class="text-sm flex items-center gap-1">

@@ -73,7 +73,11 @@ export default {
           name: this.newWorkspaceName,
           retellaiKey: this.retellaiKey,
         }
-        await ApiRequest().post(`/api/v1/workspaces/create`, payload)
+        const { data } = await ApiRequest().post(`/api/v1/workspaces/create`, payload)
+        if (data.message === 'Retell AI Key is not valid') {
+          this.toastStore.show('Retell AI Key is not valid', 'error')
+          return
+        }
         this.closeAddWorkspace()
         window.dispatchEvent(new CustomEvent('workspaces'))
         this.toastStore.show('Workspace created successfully', 'success')

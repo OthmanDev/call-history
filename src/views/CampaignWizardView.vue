@@ -176,22 +176,15 @@
             <div class="flex-1">
               <div class="flex items-center justify-between mb-1 gap-2">
                 <label class="text-[15px] font-medium block">Voice Selection</label>
-                <button
-                  class="text-[15px] font-medium block"
-                  v-if="campaignData.voice"
-                  @click="previewVoice"
-                >
-                  Preview Voice
-                </button>
               </div>
               <div class="relative flex items-center border border-border-100 rounded-md">
                 <select
-                  v-model="campaignData.voice"
+                  @change="setCurrentVoice"
                   class="w-full h-11 outline-none px-4 appearance-none cursor-pointer text-heading-100 rounded-md"
                 >
                   <option value="">Select AI voice</option>
-                  <option v-for="voice in voices" :key="voice.value" :value="voice.value">
-                    {{ voice.label }}
+                  <option v-for="voice in voices" :key="voice.voice_id" :value="voice.voice_id">
+                    {{ voice.voice_name }}
                   </option>
                 </select>
                 <span
@@ -199,9 +192,16 @@
                 >
                   <ChevronDown :size="18" :stroke-width="1.75" />
                 </span>
+                <button
+                  title="Preview Voice"
+                  class="absolute top-0 right-0 bottom-0 w-[40px] bg-white-100 flex items-center justify-center rounded-tr-md rounded-br-md"
+                  v-if="currentVoice"
+                  @click="showVoicePreview = true"
+                >
+                  <Eye :size="20" :stroke-width="1.75" />
+                </button>
               </div>
             </div>
-
             <div class="flex-1">
               <label class="text-[15px] mb-1 font-medium block">Script Template</label>
               <textarea
@@ -211,6 +211,64 @@
                 placeholder="Enter your script template. Use {name} for personalization."
               ></textarea>
               <p class="text-sm mt-1">Available variables: {name}, {company}, {location}</p>
+            </div>
+            <div
+              v-if="showVoicePreview"
+              class="bg-opacity-40 fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-heading-100"
+            >
+              <div class="max-w-xl rounded-xl w-full mx-auto bg-white-100">
+                <div class="flex items-center justify-between p-4 border-b border-border-100">
+                  <h5 class="font-semibold leading-none text-lg text-heading-100">
+                    {{ currentVoice.voice_name }} Preview
+                  </h5>
+                  <span
+                    @click="showVoicePreview = false"
+                    class="cursor-pointer transition-colors duration-100 hover:text-heading-100"
+                  >
+                    <X :size="24" :stroke-width="1.75" />
+                  </span>
+                </div>
+                <div class="without-scrollbar max-h-modal overflow-y-auto p-4">
+                  <div class="border border-border-100 rounded-xl p-4">
+                    <div class="flex justify-between xs:flex-col xs:gap-4">
+                      <div class="flex flex-1 items-center gap-4">
+                        <div class="flex-1">
+                          <h4 class="text-lg font-semibold text-heading-100 leading-none">
+                            {{ currentVoice.voice_name }}
+                          </h4>
+                          <span class="text-[15px] font-medium mt-2 block capitalize"
+                            >{{ currentVoice.accent }}, {{ currentVoice.age }},
+                            {{ currentVoice.gender }}</span
+                          >
+                        </div>
+                      </div>
+                      <div class="flex">
+                        <button
+                          v-if="!isVoicePlaying"
+                          @click="playVoice"
+                          class="w-[34px] h-[34px] border border-border-100 rounded-md flex items-center justify-center transition-all hover:bg-primary-100 hover:bg-opacity-10 hover:border-primary-100 hover:border-opacity-10 hover:text-primary-100"
+                          title="Play Voice"
+                        >
+                          <Play :size="18" />
+                        </button>
+                        <button
+                          v-else
+                          @click="pauseVoice"
+                          class="w-[34px] h-[34px] border border-border-100 rounded-md flex items-center justify-center transition-all hover:bg-primary-100 hover:bg-opacity-10 hover:border-primary-100 hover:border-opacity-10 hover:text-primary-100"
+                          title="Play Voice"
+                        >
+                          <Pause :size="18" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                  <audio
+                    :src="currentVoice.preview_audio_url"
+                    class="hidden"
+                    @ended="handleAudioEnd"
+                  />
+                </div>
+              </div>
             </div>
           </div>
 
@@ -313,8 +371,20 @@
 </template>
 
 <script>
-import { ArrowLeft, ArrowRight, Plus, ChevronDown, Check } from 'lucide-vue-next'
+import {
+  ArrowLeft,
+  ArrowRight,
+  Plus,
+  ChevronDown,
+  Check,
+  Play,
+  Pause,
+  Eye,
+  X,
+} from 'lucide-vue-next'
 import Topbar from '@/components/Topbar.vue'
+import { useLoaderStore } from '@/stores/loader'
+import ApiRequest from '@/libs/ApiRequest'
 export default {
   name: 'CampaignWizard',
   components: {
@@ -323,7 +393,15 @@ export default {
     Plus,
     ChevronDown,
     Check,
+    Play,
+    Pause,
+    Eye,
+    X,
     Topbar,
+  },
+  setup() {
+    const loaderStore = useLoaderStore()
+    return { loaderStore }
   },
   data() {
     return {
@@ -346,16 +424,28 @@ export default {
         { name: 'email', label: 'Email', checked: false, required: false },
         { name: 'address', label: 'Address', checked: false, required: false },
       ],
-      voices: [
-        { value: 'voice1', label: 'Professional Male' },
-        { value: 'voice2', label: 'Professional Female' },
-        { value: 'voice3', label: 'Casual Male' },
-        { value: 'voice4', label: 'Casual Female' },
-      ],
+      voices: [],
       timeOptions: Array.from({ length: 12 }, (_, i) => i + 8),
+      currentVoice: null,
+      showVoicePreview: false,
+      isVoicePlaying: false,
     }
   },
+  mounted() {
+    this.getVoices()
+  },
   methods: {
+    async getVoices() {
+      this.loaderStore.setIsLoading(true)
+      try {
+        const { data } = await ApiRequest().get(`/api/v1/voices/list`)
+        this.voices = data
+      } catch (e) {
+        console.error(e)
+      } finally {
+        this.loaderStore.setIsLoading(false)
+      }
+    },
     nextStep() {
       if (this.step < 4) {
         this.step++
@@ -366,6 +456,7 @@ export default {
     previousStep() {
       if (this.step > 1) {
         this.step--
+        this.currentVoice = null
       }
     },
     handleFileUpload() {
@@ -376,13 +467,32 @@ export default {
       // Handle file upload logic here
       console.log('File selected:', file)
     },
-    previewVoice() {
-      // Handle voice preview logic here
-      console.log('Preview voice:', this.campaignData.voice)
-    },
     createCampaign() {
       // Handle campaign creation logic here
       console.log('Creating campaign with data:', this.campaignData)
+    },
+    setCurrentVoice(e) {
+      this.currentVoice = this.voices.find((voice) => voice.voice_id === e.target.value)
+    },
+    playVoice() {
+      const audio = document.querySelector('audio')
+      audio.pause()
+      audio.currentTime = 0
+      this.isVoicePlaying = true
+      audio.play().catch((error) => {
+        console.error('Error playing audio:', error)
+      })
+    },
+    pauseVoice() {
+      const audio = document.querySelector('audio')
+      audio.pause()
+      audio.currentTime = 0
+      this.isVoicePlaying = false
+    },
+    handleAudioEnd() {
+      const audio = document.querySelector('audio')
+      audio.currentTime = 0
+      this.isVoicePlaying = false
     },
   },
 }
