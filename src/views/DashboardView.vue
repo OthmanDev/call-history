@@ -37,6 +37,7 @@
             Create Workspace
           </button>
           <RouterLink
+            v-if="workspacesStore.workspaces.length > 0"
             :to="{ name: 'campaign-wizard' }"
             class="flex items-center gap-2 h-11 px-4 bg-primary-100 text-white-100 rounded-md leading-none transition-all duration-150 hover:brightness-125 font-medium"
           >
@@ -44,6 +45,7 @@
             Create Outbound Calling Campaign
           </RouterLink>
           <button
+            v-if="workspacesStore.workspaces.length > 0"
             @click="showUploadContactsModal = true"
             class="flex items-center gap-2 h-11 px-4 bg-primary-100 text-white-100 rounded-md leading-none transition-all duration-150 hover:brightness-125 font-medium"
           >
@@ -52,7 +54,7 @@
           </button>
         </div>
       </div>
-      <div class="border border-border-100 rounded-xl bg-white-100">
+      <div v-if="workspacesStore.workspaces.length > 0" class="border border-border-100 rounded-xl bg-white-100">
         <div class="border-b border-border-100 p-4">
           <span class="text-lg font-semibold text-heading-100">Outbound calling performance</span>
         </div>
@@ -81,7 +83,7 @@
           </div>
         </div>
       </div>
-      <div class="flex items-start justify-between gap-6">
+      <div v-if="workspacesStore.workspaces.length > 0" class="flex items-start justify-between gap-6">
         <div class="w-[400px] h-[340px]">
           <div
             class="border border-border-100 rounded-xl bg-white-100 h-full flex flex-col justify-between"
@@ -174,12 +176,6 @@
           </div>
         </div>
       </div>
-      <!-- <SignedIn>
-        <UserButton />
-      </SignedIn>
-      <SignedOut>
-        <SignInButton />
-      </SignedOut> -->
     </div>
   </main>
   <UploadContacts
@@ -191,7 +187,6 @@
 </template>
 
 <script>
-import { SignedIn, SignedOut, SignInButton, UserButton, SignOutButton } from '@clerk/vue'
 import { Plus, Upload, Aperture } from 'lucide-vue-next'
 import Topbar from '@/components/Topbar.vue'
 import CreateWorkspace from '@/components/CreateWorkspace.vue'
@@ -202,11 +197,6 @@ import { useWorkspacesStore } from '@/stores/workspaces'
 export default {
   components: {
     Topbar,
-    SignedIn,
-    SignedOut,
-    SignInButton,
-    UserButton,
-    SignOutButton,
     Plus,
     Upload,
     Aperture,
