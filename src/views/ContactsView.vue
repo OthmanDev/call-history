@@ -626,8 +626,6 @@ export default {
         empty: false,
         first: true,
         last: true,
-        totalPickupCalls: 0,
-        totalElements: 0,
       },
       activeTab: null,
       currentPage: 0,

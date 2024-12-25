@@ -9,13 +9,13 @@
               <span class="text-lg font-semibold text-heading-100 block">Q1 Seller Outreach</span>
               <p class="">Campaign started March 15, 2024</p>
             </div>
-            <button
+            <RouterLink
+              :to="{ name: 'campaigns' }"
               class="flex items-center gap-2 h-11 px-4 bg-primary-100 text-white-100 rounded-md leading-none transition-all duration-150 hover:brightness-125 font-medium"
-              @click="goBackToCampaigns"
             >
               <ArrowLeft :size="18" :stroke-width="1.75" class="mt-[2px]" />
               Back to Campaigns
-            </button>
+            </RouterLink>
           </div>
         </div>
         <div class="p-4">
@@ -210,12 +210,6 @@ export default {
     formatTime(timestamp) {
       return new Date(timestamp).toLocaleTimeString()
     },
-
-    goBackToCampaigns() {
-      // Implement navigation logic
-      console.log('Navigating back to campaigns')
-    },
-
     exportData() {
       // Implement export logic
       console.log('Exporting data')

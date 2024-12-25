@@ -54,7 +54,10 @@
           </button>
         </div>
       </div>
-      <div v-if="workspacesStore.workspaces.length > 0" class="border border-border-100 rounded-xl bg-white-100">
+      <div
+        v-if="workspacesStore.workspaces.length > 0"
+        class="border border-border-100 rounded-xl bg-white-100"
+      >
         <div class="border-b border-border-100 p-4">
           <span class="text-lg font-semibold text-heading-100">Outbound calling performance</span>
         </div>
@@ -83,7 +86,10 @@
           </div>
         </div>
       </div>
-      <div v-if="workspacesStore.workspaces.length > 0" class="flex items-start justify-between gap-6">
+      <div
+        v-if="workspacesStore.workspaces.length > 0"
+        class="flex items-start justify-between gap-6"
+      >
         <div class="w-[400px] h-[340px]">
           <div
             class="border border-border-100 rounded-xl bg-white-100 h-full flex flex-col justify-between"
@@ -93,7 +99,9 @@
             </div>
             <div class="p-6 flex-1 flex items-center justify-center flex-col">
               <div class="text-center">
-                <div class="text-2xl font-bold text-heading-100 mb-1 uppercase">4200</div>
+                <div class="text-2xl font-bold text-heading-100 mb-1 uppercase">
+                  {{ contacts.totalElements }}
+                </div>
                 <div class="text-[17px] capitalize">Current Contatcs</div>
               </div>
             </div>
@@ -136,7 +144,10 @@
                     </tr>
                   </thead>
                   <tbody class="divide-y divide-border-100">
-                    <tr class="cursor-pointer hover:bg-[#F8F7FA] hover:bg-opacity-20">
+                    <tr
+                      @click="viewCampaign(1)"
+                      class="cursor-pointer hover:bg-[#F8F7FA] hover:bg-opacity-20"
+                    >
                       <td class="p-3 text-left font-medium text-[15px]">Q1 Seller Outreach</td>
                       <td class="p-3 text-left font-medium text-[15px]">-</td>
                       <td class="p-3 text-left font-medium text-[15px]">2,500</td>
@@ -181,7 +192,7 @@
   <UploadContacts
     v-if="showUploadContactsModal"
     @closeUploadContactsModal="closeUploadContactsModal"
-    @loadContacts="() => {}"
+    @loadContacts="loadContacts"
   />
   <CreateWorkspace v-if="isAddOpen" @closeAddWorkspace="closeAddWorkspace" />
 </template>
@@ -192,7 +203,10 @@ import Topbar from '@/components/Topbar.vue'
 import CreateWorkspace from '@/components/CreateWorkspace.vue'
 import UploadContacts from '@/components/UploadContacts.vue'
 import { useUserStore } from '@/stores/user'
+import { useLoaderStore } from '@/stores/loader'
+import { useToastStore } from '@/stores/toast'
 import { useWorkspacesStore } from '@/stores/workspaces'
+import ApiRequest from '@/libs/ApiRequest'
 
 export default {
   components: {
@@ -206,20 +220,42 @@ export default {
   setup() {
     const useStore = useUserStore()
     const workspacesStore = useWorkspacesStore()
-    return { useStore, workspacesStore }
+    const loaderStore = useLoaderStore()
+    const toastStore = useToastStore()
+    return { useStore, workspacesStore, loaderStore, toastStore }
   },
   data() {
     return {
       isAddOpen: false,
       showUploadContactsModal: false,
+      contacts: {
+        totalElements: 0,
+      },
     }
   },
+  mounted() {
+    this.loadContacts()
+  },
   methods: {
+    async loadContacts() {
+      this.loaderStore.setIsLoading(true)
+      try {
+        const { data } = await ApiRequest().get(`/api/v1/contacts/list`)
+        this.contacts = data
+      } catch (e) {
+        this.toastStore.show(e, 'error')
+      } finally {
+        this.loaderStore.setIsLoading(false)
+      }
+    },
     closeAddWorkspace() {
       this.isAddOpen = false
     },
     closeUploadContactsModal() {
       this.showUploadContactsModal = false
+    },
+    viewCampaign(campaign) {
+      this.$router.push({ name: 'campaign-details', params: { id: campaign } })
     },
   },
 }
