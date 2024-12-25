@@ -173,6 +173,7 @@
 
           <!-- Step 3: Voice & Script -->
           <div v-else-if="step === 3" class="grid gap-4">
+            <audio :src="currentVoice?.preview_audio_url" class="hidden" @ended="handleAudioEnd" />
             <div class="flex-1">
               <div class="flex items-center justify-between mb-1 gap-2">
                 <label class="text-[15px] font-medium block">Voice Selection</label>
@@ -222,7 +223,7 @@
                     {{ currentVoice.voice_name }} Preview
                   </h5>
                   <span
-                    @click="showVoicePreview = false"
+                    @click="closeVoicePreview"
                     class="cursor-pointer transition-colors duration-100 hover:text-heading-100"
                   >
                     <X :size="24" :stroke-width="1.75" />
@@ -262,11 +263,6 @@
                       </div>
                     </div>
                   </div>
-                  <audio
-                    :src="currentVoice.preview_audio_url"
-                    class="hidden"
-                    @ended="handleAudioEnd"
-                  />
                 </div>
               </div>
             </div>
@@ -493,6 +489,10 @@ export default {
       const audio = document.querySelector('audio')
       audio.currentTime = 0
       this.isVoicePlaying = false
+    },
+    closeVoicePreview() {
+      this.showVoicePreview = false
+      this.pauseVoice()
     },
   },
 }
