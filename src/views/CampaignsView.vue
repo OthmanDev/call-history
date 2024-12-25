@@ -66,42 +66,57 @@
                   <thead>
                     <tr class="bg-[#F8F7FA] border-b border-border-100">
                       <th
-                        v-for="header in tableHeaders"
-                        :key="header.key"
                         class="p-3 text-left text-heading-100 text-[15px] capitalize font-semibold"
                       >
-                        {{ header.label }}
+                        Name
+                      </th>
+                      <th
+                        class="p-3 text-left text-heading-100 text-[15px] capitalize font-semibold"
+                      >
+                        Created Date
+                      </th>
+                      <th
+                        class="p-3 text-left text-heading-100 text-[15px] capitalize font-semibold"
+                      >
+                        Recipients
+                      </th>
+                      <th
+                        class="p-3 text-left text-heading-100 text-[15px] capitalize font-semibold"
+                      >
+                        Actions
                       </th>
                     </tr>
                   </thead>
                   <tbody class="divide-y divide-border-100">
                     <tr
                       v-for="campaign in campaigns"
-                      :key="campaign.id"
-                      @click="viewCampaign(campaign)"
-                      class="cursor-pointer hover:bg-[#F8F7FA] hover:bg-opacity-20"
+                      :key="campaign.uid"
+                      class="hover:bg-[#F8F7FA] hover:bg-opacity-20"
                     >
-                      <td class="p-3 text-left font-medium text-[15px]">{{ campaign.name }}</td>
-                      <td class="p-3 text-left font-medium text-[15px]">
-                        {{ formatDate(campaign.dateSent) }}
-                      </td>
-                      <td class="p-3 text-left font-medium text-[15px]">
-                        {{ formatNumber(campaign.totalRecipients) }}
-                      </td>
-                      <td class="p-3 text-left font-medium text-[15px]">
-                        {{ formatNumber(campaign.pickups) }}
-                      </td>
-                      <td class="p-3 text-left font-medium text-[15px]">
-                        {{ formatNumber(campaign.successful) }}
-                      </td>
-                      <td class="p-3 text-left font-medium text-[15px]">
-                        {{ formatNumber(campaign.totalProspects) }}
-                      </td>
                       <td class="p-3 text-left font-medium text-[15px]">
                         <span
-                          class="inline-flex items-center text-center h-8 px-2 text-[15px] rounded-md bg-opacity-10 capitalize text-success-100 bg-success-100"
-                          >Active</span
+                          @click="viewCampaign(campaign.uid)"
+                          class="transition-colors duration-100 hover:text-primary-100 cursor-pointer"
                         >
+                          {{ campaign.name }}
+                        </span>
+                      </td>
+                      <td class="p-3 text-left font-medium text-[15px]">
+                        {{ formatDate(campaign.created) }}
+                      </td>
+                      <td class="p-3 text-left font-medium text-[15px]">
+                        {{ campaign.contactNumber }}
+                      </td>
+                      <td class="p-3 text-left font-medium text-[15px]">
+                        <div class="flex items-center gap-2">
+                          <span
+                            @click="deleteCampaign(campaign.uid)"
+                            class="cursor-pointer transition-colors duration-150 hover:text-danger-100"
+                            title="Delete Campaign"
+                          >
+                            <Trash2 :size="20" :stroke-width="1.75" />
+                          </span>
+                        </div>
                       </td>
                     </tr>
                   </tbody>
@@ -165,7 +180,11 @@
 </template>
 
 <script>
-import { Plus, Filter, ChevronDown } from 'lucide-vue-next'
+import { Plus, Filter, ChevronDown, Trash2 } from 'lucide-vue-next'
+import { useLoaderStore } from '@/stores/loader'
+import { useToastStore } from '@/stores/toast'
+import ApiRequest from '@/libs/ApiRequest'
+import moment from 'moment'
 import Topbar from '@/components/Topbar.vue'
 export default {
   name: 'CampaignDashboard',
@@ -174,6 +193,12 @@ export default {
     Plus,
     Filter,
     ChevronDown,
+    Trash2,
+  },
+  setup() {
+    const loaderStore = useLoaderStore()
+    const toastStore = useToastStore()
+    return { loaderStore, toastStore }
   },
   data() {
     return {
@@ -187,31 +212,8 @@ export default {
         { key: 'name', label: 'Name' },
         { key: 'date', label: 'Date Sent' },
         { key: 'recipients', label: 'Recipients' },
-        { key: 'pickups', label: 'Pickups' },
-        { key: 'successful', label: 'Successful' },
-        { key: 'prospects', label: 'Prospects' },
-        { key: 'status', label: 'Status' },
       ],
-      campaigns: [
-        {
-          id: 1,
-          name: 'Q1 Seller Outreach',
-          dateSent: '2024-03-15',
-          totalRecipients: 2500,
-          pickups: 1200,
-          successful: 450,
-          totalProspects: 180,
-        },
-        {
-          id: 2,
-          name: 'February Buyer Follow-up',
-          dateSent: '2024-02-20',
-          totalRecipients: 1800,
-          pickups: 950,
-          successful: 320,
-          totalProspects: 145,
-        },
-      ],
+      campaigns: [],
       statsCards: [
         {
           title: "Today's Calls",
@@ -231,18 +233,40 @@ export default {
       ],
     }
   },
+  mounted() {
+    this.getCampaigns()
+  },
   methods: {
-    formatDate(date) {
-      return new Date(date).toLocaleDateString()
+    async getCampaigns() {
+      this.loaderStore.setIsLoading(true)
+      try {
+        const { data } = await ApiRequest().get(`/api/v1/compaigns/list`)
+        this.campaigns = data
+      } catch (e) {
+        this.toastStore.show(e, 'error')
+      } finally {
+        this.loaderStore.setIsLoading(false)
+      }
     },
-    formatNumber(number) {
-      return number.toLocaleString()
+    formatDate(value) {
+      if (!value) return '-'
+      return moment(value).format('MM/DD/YYYY HH:mm')
     },
-    toggleFilters() {
-      console.log('Toggling filters')
+    toggleFilters() {},
+    async deleteCampaign(uid) {
+      this.loaderStore.setIsLoading(true)
+      try {
+        const { data } = await ApiRequest().delete(`/api/v1/compaigns/delete/${uid}`)
+        this.toastStore.show('Campaign deleted successfully!', 'success')
+        this.getCampaigns()
+      } catch (e) {
+        this.toastStore.show(e, 'error')
+      } finally {
+        this.loaderStore.setIsLoading(false)
+      }
     },
-    viewCampaign(campaign) {
-      this.$router.push({ name: 'campaign-details', params: { id: campaign.id } })
+    viewCampaign(uid) {
+      this.$router.push({ name: 'campaign-details', params: { uid: uid } })
     },
   },
 }

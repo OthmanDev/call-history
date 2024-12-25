@@ -156,6 +156,7 @@
 import { Plus, ChevronDown, ShieldCheck, Building } from 'lucide-vue-next'
 import Topbar from '@/components/Topbar.vue'
 import { useLoaderStore } from '@/stores/loader'
+import { useLoaderStore } from '@/stores/toast'
 import ApiRequest from '@/libs/ApiRequest'
 
 export default {
@@ -169,7 +170,8 @@ export default {
   },
   setup() {
     const loaderStore = useLoaderStore()
-    return { loaderStore }
+    const toastStore = useLoaderStore()
+    return { loaderStore, toastStore }
   },
   mounted() {
     this.getAgents()
@@ -213,7 +215,7 @@ export default {
         const { data } = await ApiRequest().get(`/api/v1/numbers/list`)
         this.phoneNumbers = data
       } catch (e) {
-        console.error(e)
+        this.toastStore.show(e, 'error')
       } finally {
         this.loaderStore.setIsLoading(false)
       }
@@ -224,7 +226,7 @@ export default {
         const { data } = await ApiRequest().get(`/api/v1/agents/list`)
         this.agents = data
       } catch (e) {
-        console.error(e)
+        this.toastStore.show(e, 'error')
       } finally {
         this.loaderStore.setIsLoading(false)
       }

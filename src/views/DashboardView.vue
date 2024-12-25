@@ -134,7 +134,7 @@
                       <th
                         class="p-3 text-left text-heading-100 text-[15px] capitalize font-semibold"
                       >
-                        Lead source
+                        Created Date
                       </th>
                       <th
                         class="p-3 text-left text-heading-100 text-[15px] capitalize font-semibold"
@@ -145,40 +145,20 @@
                   </thead>
                   <tbody class="divide-y divide-border-100">
                     <tr
-                      @click="viewCampaign(1)"
-                      class="cursor-pointer hover:bg-[#F8F7FA] hover:bg-opacity-20"
+                      v-for="campaign in campaigns.slice(0, 5)"
+                      :key="campaign.uid"
+                      @click="viewCampaign(campaign.uid)"
+                      class="hover:bg-[#F8F7FA] hover:bg-opacity-20 cursor-pointer"
                     >
-                      <td class="p-3 text-left font-medium text-[15px]">Q1 Seller Outreach</td>
-                      <td class="p-3 text-left font-medium text-[15px]">-</td>
-                      <td class="p-3 text-left font-medium text-[15px]">2,500</td>
-                    </tr>
-                    <tr class="cursor-pointer hover:bg-[#F8F7FA] hover:bg-opacity-20">
                       <td class="p-3 text-left font-medium text-[15px]">
-                        February Buyer Follow-up
+                        {{ campaign.name }}
                       </td>
-                      <td class="p-3 text-left font-medium text-[15px]">-</td>
-                      <td class="p-3 text-left font-medium text-[15px]">1,800</td>
-                    </tr>
-                    <tr class="cursor-pointer hover:bg-[#F8F7FA] hover:bg-opacity-20">
                       <td class="p-3 text-left font-medium text-[15px]">
-                        February Buyer Follow-up
+                        {{ formatDate(campaign.created) }}
                       </td>
-                      <td class="p-3 text-left font-medium text-[15px]">-</td>
-                      <td class="p-3 text-left font-medium text-[15px]">1,800</td>
-                    </tr>
-                    <tr class="cursor-pointer hover:bg-[#F8F7FA] hover:bg-opacity-20">
                       <td class="p-3 text-left font-medium text-[15px]">
-                        February Buyer Follow-up
+                        {{ campaign.contactNumber }}
                       </td>
-                      <td class="p-3 text-left font-medium text-[15px]">-</td>
-                      <td class="p-3 text-left font-medium text-[15px]">1,800</td>
-                    </tr>
-                    <tr class="cursor-pointer hover:bg-[#F8F7FA] hover:bg-opacity-20">
-                      <td class="p-3 text-left font-medium text-[15px]">
-                        February Buyer Follow-up
-                      </td>
-                      <td class="p-3 text-left font-medium text-[15px]">-</td>
-                      <td class="p-3 text-left font-medium text-[15px]">1,800</td>
                     </tr>
                   </tbody>
                 </table>
@@ -198,7 +178,7 @@
 </template>
 
 <script>
-import { Plus, Upload, Aperture } from 'lucide-vue-next'
+import { Plus, Upload, Aperture, Trash2 } from 'lucide-vue-next'
 import Topbar from '@/components/Topbar.vue'
 import CreateWorkspace from '@/components/CreateWorkspace.vue'
 import UploadContacts from '@/components/UploadContacts.vue'
@@ -207,6 +187,7 @@ import { useLoaderStore } from '@/stores/loader'
 import { useToastStore } from '@/stores/toast'
 import { useWorkspacesStore } from '@/stores/workspaces'
 import ApiRequest from '@/libs/ApiRequest'
+import moment from 'moment'
 
 export default {
   components: {
@@ -214,6 +195,7 @@ export default {
     Plus,
     Upload,
     Aperture,
+    Trash2,
     CreateWorkspace,
     UploadContacts,
   },
@@ -231,10 +213,12 @@ export default {
       contacts: {
         totalElements: 0,
       },
+      campaigns: [],
     }
   },
   mounted() {
     this.loadContacts()
+    this.getCampaigns()
   },
   methods: {
     async loadContacts() {
@@ -254,8 +238,23 @@ export default {
     closeUploadContactsModal() {
       this.showUploadContactsModal = false
     },
-    viewCampaign(campaign) {
-      this.$router.push({ name: 'campaign-details', params: { id: campaign } })
+    async getCampaigns() {
+      this.loaderStore.setIsLoading(true)
+      try {
+        const { data } = await ApiRequest().get(`/api/v1/compaigns/list`)
+        this.campaigns = data
+      } catch (e) {
+        this.toastStore.show(e, 'error')
+      } finally {
+        this.loaderStore.setIsLoading(false)
+      }
+    },
+    viewCampaign(uid) {
+      this.$router.push({ name: 'campaign-details', params: { uid: uid } })
+    },
+    formatDate(value) {
+      if (!value) return '-'
+      return moment(value).format('MM/DD/YYYY HH:mm')
     },
   },
 }

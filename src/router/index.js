@@ -38,7 +38,7 @@ const router = createRouter({
       },
     },
     {
-      path: '/campaigns/:id',
+      path: '/campaigns/:uid',
       name: 'campaign-details',
       component: () => import('@/views/CampaignDetailsView.vue'),
       meta: {

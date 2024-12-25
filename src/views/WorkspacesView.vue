@@ -152,7 +152,7 @@ export default {
         this.workspaces = data
         this.workspacesStore.setWorkspaces(data)
       } catch (e) {
-        console.error(e)
+        this.toastStore.show(e, 'error')
       } finally {
         this.loaderStore.setIsLoading(false)
       }
@@ -161,8 +161,10 @@ export default {
       this.loaderStore.setIsLoading(true)
       try {
         const { data } = await ApiRequest().delete(`/api/v1/workspaces/delete/${uid}`)
-        this.toastStore.show('Workspace deleted successfully', 'success')
-        this.getWorkspaces()
+        if (data) {
+          this.toastStore.show('Workspace deleted successfully', 'success')
+          this.getWorkspaces()
+        }
       } catch (e) {
         this.toastStore.show(e, 'error')
       } finally {
@@ -173,8 +175,10 @@ export default {
       this.loaderStore.setIsLoading(true)
       try {
         const { data } = await ApiRequest().get(`/api/v1/workspaces/default/${uid}`)
-        this.toastStore.show('Workspace seted as default successfully', 'success')
-        this.getWorkspaces()
+        if (data) {
+          this.toastStore.show('Workspace seted as default successfully', 'success')
+          this.getWorkspaces()
+        }
       } catch (e) {
         this.toastStore.show(e, 'error')
       } finally {

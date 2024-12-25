@@ -206,7 +206,7 @@
             <div class="flex-1">
               <label class="text-[15px] mb-1 font-medium block">Script Template</label>
               <textarea
-                v-model="campaignData.script"
+                v-model="campaignData.scriptTemplate"
                 class="border border-border-100 w-full outline-none py-2 px-4 text-heading-100 rounded-md"
                 rows="4"
                 placeholder="Enter your script template. Use {name} for personalization."
@@ -277,6 +277,7 @@
                   v-model="campaignData.maxAttempts"
                   class="w-full h-11 outline-none px-4 appearance-none cursor-pointer text-heading-100 rounded-md"
                 >
+                  <option value="">Select maximum call attempts</option>
                   <option v-for="n in 5" :key="n" :value="n">{{ n }}</option>
                 </select>
                 <span
@@ -286,7 +287,6 @@
                 </span>
               </div>
             </div>
-
             <div>
               <span class="text-[15px] font-medium block mb-1">Retry interval (hours)</span>
               <div class="relative flex items-center border border-border-100 rounded-md">
@@ -294,6 +294,7 @@
                   v-model="campaignData.retryInterval"
                   class="w-full h-11 outline-none px-4 appearance-none cursor-pointer text-heading-100 rounded-md"
                 >
+                  <option value="">Select retry interval (hours)</option>
                   <option v-for="n in [4, 8, 12, 24, 48]" :key="n" :value="n">{{ n }}</option>
                 </select>
                 <span
@@ -303,15 +304,15 @@
                 </span>
               </div>
             </div>
-
-            <div>
-              <span class="text-[15px] font-medium block mb-1">Call window</span>
-              <div class="flex items-center gap-2">
+            <div class="flex items-center gap-2">
+              <div class="flex-1">
+                <span class="text-[15px] font-medium block mb-1">Call window Min</span>
                 <div class="relative flex-1 flex items-center border border-border-100 rounded-md">
                   <select
-                    v-model="campaignData.startTime"
+                    v-model="campaignData.callWindowMin"
                     class="w-full h-11 outline-none px-4 appearance-none cursor-pointer text-heading-100 rounded-md"
                   >
+                    <option value="">Select call window min</option>
                     <option v-for="n in timeOptions" :key="n" :value="n">{{ n }}:00</option>
                   </select>
                   <span
@@ -320,11 +321,15 @@
                     <ChevronDown :size="18" :stroke-width="1.75" />
                   </span>
                 </div>
+              </div>
+              <div class="flex-1">
+                <span class="text-[15px] font-medium block mb-1">Call window Max</span>
                 <div class="relative flex-1 flex items-center border border-border-100 rounded-md">
                   <select
-                    v-model="campaignData.endTime"
+                    v-model="campaignData.callWindowMax"
                     class="w-full h-11 outline-none px-4 appearance-none cursor-pointer text-heading-100 rounded-md"
                   >
+                    <option value="">Select call window max</option>
                     <option v-for="n in timeOptions" :key="n" :value="n">{{ n }}:00</option>
                   </select>
                   <span
@@ -380,6 +385,7 @@ import {
 } from 'lucide-vue-next'
 import Topbar from '@/components/Topbar.vue'
 import { useLoaderStore } from '@/stores/loader'
+import { useToastStore } from '@/stores/toast'
 import ApiRequest from '@/libs/ApiRequest'
 export default {
   name: 'CampaignWizard',
@@ -397,7 +403,8 @@ export default {
   },
   setup() {
     const loaderStore = useLoaderStore()
-    return { loaderStore }
+    const toastStore = useToastStore()
+    return { loaderStore, toastStore }
   },
   data() {
     return {
@@ -405,14 +412,15 @@ export default {
       stepTitles: ['Campaign Details', 'Contact List', 'Voice & Script', 'Campaign Settings'],
       campaignData: {
         name: '',
-        description: '',
         type: '',
-        voice: '',
-        script: '',
-        maxAttempts: 5,
-        retryInterval: 24,
-        startTime: 9,
-        endTime: 17,
+        description: '',
+        contactListId: '',
+        voiceId: '',
+        scriptTemplate: '',
+        maxAttempts: '',
+        retryInterval: '',
+        callWindowMin: '',
+        callWindowMax: '',
       },
       requiredFields: [
         { name: 'phone', label: 'Phone Number', checked: true, required: true },
@@ -425,6 +433,9 @@ export default {
       currentVoice: null,
       showVoicePreview: false,
       isVoicePlaying: false,
+      upload: {
+        selectedCSV: null,
+      },
     }
   },
   mounted() {
@@ -437,14 +448,14 @@ export default {
         const { data } = await ApiRequest().get(`/api/v1/voices/list`)
         this.voices = data
       } catch (e) {
-        console.error(e)
+        this.toastStore.show(e, 'error')
       } finally {
         this.loaderStore.setIsLoading(false)
       }
     },
     nextStep() {
       if (this.step < 4) {
-        this.step++
+        this.checkRequiredFields(this.step)
       } else {
         this.createCampaign()
       }
@@ -452,20 +463,47 @@ export default {
     previousStep() {
       if (this.step > 1) {
         this.step--
-        this.currentVoice = null
       }
     },
-    handleFileUpload() {
-      this.$refs.fileInput.click()
-    },
-    onFileSelected(event) {
+    handleFileUpload(event) {
       const file = event.target.files[0]
-      // Handle file upload logic here
-      console.log('File selected:', file)
+      if (!file) {
+        this.upload.selectedCSV = null
+        return
+      }
+      if (!file.name.toLowerCase().endsWith('.csv')) {
+        this.upload.selectedCSV = null
+        return
+      }
+      this.upload.selectedCSV = file
+      this.uploadCSV()
     },
-    createCampaign() {
-      // Handle campaign creation logic here
-      console.log('Creating campaign with data:', this.campaignData)
+    async createCampaign() {
+      if (this.step === 4) {
+        if (
+          !this.campaignData.maxAttempts ||
+          !this.campaignData.retryInterval ||
+          !this.campaignData.callWindowMin ||
+          !this.campaignData.callWindowMax
+        ) {
+          this.toastStore.show(`You must fill the ${this.stepTitles[3]} fields`, 'error')
+          return
+        }
+      }
+      this.loaderStore.setIsLoading(true)
+      try {
+        const payload = this.campaignData
+        payload.voiceId = this.currentVoice.voice_id
+        const { data } = await ApiRequest().post(`/api/v1/compaigns/create`, payload)
+        if (data) {
+          this.toastStore.show('Campaign created successfully!', 'success')
+          this.$router.push({ name: 'campaigns' })
+        }
+      } catch (e) {
+        this.toastStore.show(e, 'error')
+      } finally {
+        this.loaderStore.setIsLoading(false)
+      }
     },
     setCurrentVoice(e) {
       this.currentVoice = this.voices.find((voice) => voice.voice_id === e.target.value)
@@ -493,6 +531,46 @@ export default {
     closeVoicePreview() {
       this.showVoicePreview = false
       this.pauseVoice()
+    },
+    checkRequiredFields(step) {
+      if (step === 1) {
+        if (!this.campaignData.name || !this.campaignData.type || !this.campaignData.description) {
+          this.toastStore.show(`You must fill the ${this.stepTitles[0]} fields`, 'error')
+          return
+        }
+      }
+      if (step === 2) {
+        if (!this.campaignData.contactListId) {
+          this.toastStore.show(`You must fill the ${this.stepTitles[1]} fields`, 'error')
+          return
+        }
+      }
+      if (step === 3) {
+        if (!this.currentVoice || !this.campaignData.scriptTemplate) {
+          this.toastStore.show(`You must fill the ${this.stepTitles[2]} fields`, 'error')
+          return
+        }
+      }
+      this.step++
+    },
+    async uploadCSV() {
+      this.loaderStore.setIsLoading(true)
+      try {
+        const payload = {
+          contacts: this.upload.selectedCSV,
+        }
+        const { data } = await ApiRequest().post(`/api/v1/contacts/upload`, payload, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        })
+        this.campaignData.contactListId = data.uid
+        this.toastStore.show('Contacts uploaded successfully!', 'success')
+      } catch (e) {
+        this.toastStore.show(e, 'error')
+      } finally {
+        this.loaderStore.setIsLoading(false)
+      }
     },
   },
 }

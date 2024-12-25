@@ -828,7 +828,7 @@ export default {
     },
     formatDate(value) {
       if (!value) return '-'
-      return moment(value).format('MM/DD/YYYY')
+      return moment(value).format('MM/DD/YYYY HH:mm')
     },
     formatDuration(value) {
       if (!value) return '-'
