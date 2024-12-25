@@ -175,10 +175,8 @@ export default {
       this.loaderStore.setIsLoading(true)
       try {
         const { data } = await ApiRequest().get(`/api/v1/workspaces/default/${uid}`)
-        if (data) {
-          this.toastStore.show('Workspace seted as default successfully', 'success')
-          this.getWorkspaces()
-        }
+        this.toastStore.show('Workspace seted as default successfully', 'success')
+        this.getWorkspaces()
       } catch (e) {
         this.toastStore.show(e, 'error')
       } finally {
