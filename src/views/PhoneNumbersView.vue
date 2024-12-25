@@ -156,7 +156,7 @@
 import { Plus, ChevronDown, ShieldCheck, Building } from 'lucide-vue-next'
 import Topbar from '@/components/Topbar.vue'
 import { useLoaderStore } from '@/stores/loader'
-import { useLoaderStore } from '@/stores/toast'
+import { useToastStore } from '@/stores/toast'
 import ApiRequest from '@/libs/ApiRequest'
 
 export default {
@@ -170,7 +170,7 @@ export default {
   },
   setup() {
     const loaderStore = useLoaderStore()
-    const toastStore = useLoaderStore()
+    const toastStore = useToastStore()
     return { loaderStore, toastStore }
   },
   mounted() {
