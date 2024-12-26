@@ -33,13 +33,13 @@
               <div class="flex items-center gap-1">
                 <span
                   v-if="!workspace.default"
-                  title="Set as default"
+                  v-tooltip="'Set as default'"
                   @click="setWorkspaceAsDefault(workspace.uid)"
                   class="cursor-pointer hover:text-success-100"
                   ><CircleCheck :size="20" :stroke-width="1.75"
                 /></span>
                 <span
-                  title="Delete"
+                  v-tooltip="'Delete'"
                   @click="deleteWorkspace(workspace.uid)"
                   class="cursor-pointer hover:text-danger-100"
                   ><Trash2 :size="20" :stroke-width="1.75"

@@ -64,7 +64,7 @@
         <div class="p-4">
           <div class="grid grid-cols-5 gap-4">
             <div class="border border-border-100 rounded-xl bg-white-100 p-4">
-              <div class="text-2xl font-bold text-heading-100 mb-1 uppercase">4200</div>
+              <div class="text-2xl font-bold text-heading-100 mb-1 uppercase">{{formatNumber(4200)}}</div>
               <div class="text-[17px] capitalize">Total Calls Made</div>
             </div>
             <div class="border border-border-100 rounded-xl bg-white-100 p-4">
@@ -307,6 +307,14 @@ export default {
     formatDate(value) {
       if (!value) return '-'
       return moment(value).format('MM/DD/YYYY HH:mm')
+    },
+    formatNumber(value) {
+      if (!value) return '-'
+      if (value >= 1000) {
+        return `+${Math.floor(value / 1000)}k`
+      } else {
+        return value
+      }
     },
   },
 }

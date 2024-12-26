@@ -12,6 +12,7 @@
   "dependencies": {
     "@clerk/vue": "^1.0.0",
     "axios": "^1.7.9",
+    "floating-vue": "^5.2.2",
     "lucide-vue-next": "^0.468.0",
     "moment": "^2.30.1",
     "pinia": "^2.2.6",

@@ -189,13 +189,17 @@
                   </option>
                 </select>
                 <span
+                  v-if="!currentVoice"
                   class="absolute top-0 right-0 bottom-0 w-[40px] bg-white-100 pointer-events-none flex items-center justify-center rounded-tr-md rounded-br-md"
                 >
                   <ChevronDown :size="18" :stroke-width="1.75" />
                 </span>
                 <button
-                  title="Preview Voice"
-                  class="absolute top-0 right-0 bottom-0 w-[40px] bg-white-100 flex items-center justify-center rounded-tr-md rounded-br-md"
+                  v-tooltip="{
+                    content: 'Preview voice',
+                    placement: 'left'
+                  }"
+                  class="absolute top-0 right-4 bottom-0  bg-white-100 flex items-center justify-center rounded-tr-md rounded-br-md"
                   v-if="currentVoice"
                   @click="showVoicePreview = true"
                 >

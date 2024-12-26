@@ -52,10 +52,19 @@
                           class="w-full h-11 outline-none px-4 appearance-none cursor-pointer text-heading-100 rounded-md"
                         >
                           <option
+                            v-if="!number.hasOwnProperty('inbound_agent_id')"
+                            selected
+                            disabled
+                            value=""
+                          >
+                            Inbound call agent
+                          </option>
+                          <option v-else value="" disabled>Inbound call agent</option>
+                          <option
                             :value="agent.agent_name"
                             v-for="(agent, key) in agents"
                             :key="key"
-                            :selected="agent.agent_id === number?.inbound_agent_id"
+                            :selected="agent.agent_id === number.inbound_agent_id"
                           >
                             {{ agent.agent_name }}
                           </option>
