@@ -116,6 +116,13 @@
                           >
                             <Trash2 :size="20" :stroke-width="1.75" />
                           </span>
+                          <span
+                            @click="deleteCampaign(campaign.uid)"
+                            class="cursor-pointer transition-colors duration-150 hover:text-primary-100"
+                            v-tooltip="'Archive'"
+                          >
+                            <Archive :size="20" :stroke-width="1.75" />
+                          </span>
                         </div>
                       </td>
                     </tr>
@@ -232,7 +239,7 @@
 </template>
 
 <script>
-import { Plus, Filter, ChevronDown, Trash2 } from 'lucide-vue-next'
+import { Plus, Filter, ChevronDown, Trash2, Archive } from 'lucide-vue-next'
 import { useLoaderStore } from '@/stores/loader'
 import { useToastStore } from '@/stores/toast'
 import ApiRequest from '@/libs/ApiRequest'
@@ -246,6 +253,7 @@ export default {
     Filter,
     ChevronDown,
     Trash2,
+    Archive
   },
   setup() {
     const loaderStore = useLoaderStore()
