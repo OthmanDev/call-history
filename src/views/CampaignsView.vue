@@ -112,7 +112,7 @@
                           <span
                             @click="deleteCampaign(campaign.uid)"
                             class="cursor-pointer transition-colors duration-150 hover:text-danger-100"
-                            title="Delete Campaign"
+                            v-tooltip="'Delete'"
                           >
                             <Trash2 :size="20" :stroke-width="1.75" />
                           </span>

@@ -100,7 +100,10 @@
               </svg>
               <span class="block truncate">{{ upload.selectedCSV.name }}</span>
             </div>
-            <span @click="upload.selectedCSV = null" class="cursor-pointer hover:text-danger-100"
+            <span
+              @click="upload.selectedCSV = null"
+              class="cursor-pointer hover:text-danger-100"
+              v-tooltip="'Delete'"
               ><Trash2 :size="20" :stroke-width="1.75"
             /></span>
           </div>
