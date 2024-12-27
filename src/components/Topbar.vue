@@ -6,12 +6,12 @@
           <menu-right-icon class="w-[23px] h-[23px]" />
         </span>
         <h1 class="text-xl font-bold text-heading-100 leading-none">{{ title }}</h1>
+        <slot></slot>
         <span
           v-if="currentWorkspace"
-          class="inline-flex items-center text-center h-8 px-2 text-[15px] rounded-md bg-opacity-10 capitalize bg-primary-100 text-primary-100"
-          >current workspace: {{ currentWorkspace.name }}</span
+          class="inline-flex items-center text-center h-8 px-2 gap-1 text-[15px] rounded-md bg-opacity-10 capitalize bg-primary-100 text-primary-100"
+          >current workspace: <span class="font-medium">{{ currentWorkspace.name }}</span></span
         >
-        <slot></slot>
       </div>
       <div class="flex items-center gap-2">
         <div class="relative z-[9999]">
