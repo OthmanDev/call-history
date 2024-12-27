@@ -831,19 +831,16 @@ export default {
       return moment(value).format('MM/DD/YYYY HH:mm')
     },
     formatDuration(value) {
+      if (value === 0) return 0
       if (!value) return '-'
-      const totalSeconds = Number(value)
-      const duration = moment.duration(totalSeconds, 'seconds')
-      const hours = Math.floor(duration.asHours())
-      const minutes = duration.minutes()
-      const secs = duration.seconds()
-      if (hours > 0) {
-        return [hours, minutes.toString().padStart(2, '0'), secs.toString().padStart(2, '0')].join(
-          ':',
-        )
-      } else {
-        return [minutes.toString().padStart(2, '0'), secs.toString().padStart(2, '0')].join(':')
-      }
+      const totalSeconds = Math.floor(value / 1000)
+      const hours = Math.floor(totalSeconds / 3600)
+      const minutes = Math.floor((totalSeconds % 3600) / 60)
+      const seconds = totalSeconds % 60
+      const hoursFormatted = hours.toString().padStart(2, '0')
+      const minutesFormatted = minutes.toString().padStart(2, '0')
+      const secondsFormatted = seconds.toString().padStart(2, '0')
+      return `${hoursFormatted}:${minutesFormatted}:${secondsFormatted}`
     },
     callStatus(value) {
       if (!value) return ''
