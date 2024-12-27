@@ -24,7 +24,7 @@
         </div>
         <div class="p-4">
           <!-- Step 1: Campaign Details -->
-          <div v-if="step === 1" class="grid grid-cols-2 gap-4">
+          <div v-if="step === 1" class="grid grid-cols-3 gap-4">
             <div class="flex-1">
               <label class="text-[15px] mb-1 font-medium block">Campaign Name</label>
               <input
@@ -51,7 +51,30 @@
                 </span>
               </div>
             </div>
-            <div class="col-span-2">
+            <div class="flex-1">
+              <label class="text-[15px] mb-1 font-medium block">Phone Number</label>
+              <div class="relative flex items-center border border-border-100 rounded-md">
+                <select
+                  v-model="campaignData.phoneNumber"
+                  class="w-full h-11 outline-none px-4 appearance-none cursor-pointer text-heading-100 rounded-md"
+                >
+                  <option value="" selected>Select phone number</option>
+                  <option
+                    v-for="(number, key) in phoneNumbers"
+                    :key="key"
+                    :value="number.phone_number"
+                  >
+                    {{ number.phone_number }}
+                  </option>
+                </select>
+                <span
+                  class="absolute top-0 right-0 bottom-0 w-[40px] bg-white-100 pointer-events-none flex items-center justify-center rounded-tr-md rounded-br-md"
+                >
+                  <ChevronDown :size="18" :stroke-width="1.75" />
+                </span>
+              </div>
+            </div>
+            <div class="col-span-3">
               <div class="">
                 <label class="text-[15px] mb-1 font-medium block">Description</label>
                 <textarea
@@ -197,9 +220,9 @@
                 <button
                   v-tooltip="{
                     content: 'Preview voice',
-                    placement: 'left'
+                    placement: 'left',
                   }"
-                  class="absolute top-0 right-4 bottom-0  bg-white-100 flex items-center justify-center rounded-tr-md rounded-br-md"
+                  class="absolute top-0 right-4 bottom-0 bg-white-100 flex items-center justify-center rounded-tr-md rounded-br-md"
                   v-if="currentVoice"
                   @click="showVoicePreview = true"
                 >
@@ -425,6 +448,7 @@ export default {
         retryInterval: '',
         callWindowMin: '',
         callWindowMax: '',
+        phoneNumber: '',
       },
       requiredFields: [
         { name: 'phone', label: 'Phone Number', checked: true, required: true },
@@ -433,6 +457,7 @@ export default {
         { name: 'address', label: 'Address', checked: false, required: false },
       ],
       voices: [],
+      phoneNumbers: [],
       timeOptions: Array.from({ length: 12 }, (_, i) => i + 8),
       currentVoice: null,
       showVoicePreview: false,
@@ -443,6 +468,7 @@ export default {
     }
   },
   mounted() {
+    this.getPhoneNumbers()
     this.getVoices()
   },
   methods: {
@@ -451,6 +477,17 @@ export default {
       try {
         const { data } = await ApiRequest().get(`/api/v1/voices/list`)
         this.voices = data
+      } catch (e) {
+        this.toastStore.show(e, 'error')
+      } finally {
+        this.loaderStore.setIsLoading(false)
+      }
+    },
+    async getPhoneNumbers() {
+      this.loaderStore.setIsLoading(true)
+      try {
+        const { data } = await ApiRequest().get(`/api/v1/numbers/list`)
+        this.phoneNumbers = data
       } catch (e) {
         this.toastStore.show(e, 'error')
       } finally {
@@ -538,7 +575,12 @@ export default {
     },
     checkRequiredFields(step) {
       if (step === 1) {
-        if (!this.campaignData.name || !this.campaignData.type || !this.campaignData.description) {
+        if (
+          !this.campaignData.name ||
+          !this.campaignData.type ||
+          !this.campaignData.description ||
+          !this.campaignData.phoneNumber
+        ) {
           this.toastStore.show(`You must fill the ${this.stepTitles[0]} fields`, 'error')
           return
         }

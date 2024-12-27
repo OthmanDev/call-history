@@ -48,16 +48,48 @@
         </div>
         <div v-if="currentTab === 'active'">
           <div class="p-4 grid gap-4">
-            <div class="grid grid-cols-3 gap-4">
-              <div
-                v-for="stat in statsCards"
-                :key="stat.title"
-                class="border border-border-100 rounded-xl bg-white-100 p-4"
-              >
+            <div class="grid grid-cols-5 gap-4">
+              <div class="border border-border-100 rounded-xl bg-white-100 p-4">
                 <div class="text-2xl font-bold text-heading-100 mb-1 uppercase">
-                  {{ stat.value }}
+                  {{ statsCards['totalCalls'] }}
                 </div>
-                <div class="text-[17px] capitalize">{{ stat.title }}</div>
+                <div class="text-[17px] capitalize">Total Calls</div>
+              </div>
+              <div class="border border-border-100 rounded-xl bg-white-100 p-4">
+                <div class="text-2xl font-bold text-heading-100 mb-1 uppercase">
+                  {{ statsCards['answeredCalls'] }}
+                </div>
+                <div class="text-[17px] capitalize">Answered Calls</div>
+              </div>
+              <div class="border border-border-100 rounded-xl bg-white-100 p-4">
+                <div class="text-2xl font-bold text-heading-100 mb-1 uppercase">
+                  {{ statsCards['successfulCalls'] }}
+                </div>
+                <div class="text-[17px] capitalize">Successfull Calls</div>
+              </div>
+              <div class="border border-border-100 rounded-xl bg-white-100 p-4">
+                <div class="text-2xl font-bold text-heading-100 mb-1 uppercase">
+                  {{ statsCards['compliantCalls'] }}
+                </div>
+                <div class="text-[17px] capitalize">Compliant Calls</div>
+              </div>
+              <div class="border border-border-100 rounded-xl bg-white-100 p-4">
+                <div class="text-2xl font-bold text-heading-100 mb-1 uppercase">
+                  {{ statsCards['answerRate'] }}%
+                </div>
+                <div class="text-[17px] capitalize">Call Answer Rate</div>
+              </div>
+              <div class="border border-border-100 rounded-xl bg-white-100 p-4">
+                <div class="text-2xl font-bold text-heading-100 mb-1 uppercase">
+                  {{ statsCards['followupConversion'] }}%
+                </div>
+                <div class="text-[17px] capitalize">Follow-Up Conversion</div>
+              </div>
+              <div class="border border-border-100 rounded-xl bg-white-100 p-4">
+                <div class="text-2xl font-bold text-heading-100 mb-1 uppercase">
+                  {{ statsCards['complianceRate'] }}%
+                </div>
+                <div class="text-[17px] capitalize">Compliance Rate</div>
               </div>
             </div>
             <div class="border border-border-100 rounded-xl overflow-hidden">
@@ -110,13 +142,14 @@
                       <td class="p-3 text-left font-medium text-[15px]">
                         <div class="flex items-center gap-2">
                           <span
-                            @click="deleteCampaign(campaign.uid)"
+                            @click="deleteCampaign(campaign.uid, false)"
                             class="cursor-pointer transition-colors duration-150 hover:text-danger-100"
                             v-tooltip="'Delete'"
                           >
                             <Trash2 :size="20" :stroke-width="1.75" />
                           </span>
                           <span
+                            @click="archiveCampaign(campaign.uid)"
                             class="cursor-pointer transition-colors duration-150 hover:text-primary-100"
                             v-tooltip="'Archive'"
                           >
@@ -235,13 +268,14 @@
                       <td class="p-3 text-left font-medium text-[15px]">
                         <div class="flex items-center gap-2">
                           <span
-                            @click="deleteCampaign(campaign.uid)"
+                            @click="deleteCampaign(campaign.uid, true)"
                             class="cursor-pointer transition-colors duration-150 hover:text-danger-100"
                             v-tooltip="'Delete'"
                           >
                             <Trash2 :size="20" :stroke-width="1.75" />
                           </span>
                           <span
+                            @click="restoreCampaign(campaign.uid)"
                             class="cursor-pointer transition-colors duration-150 hover:text-primary-100"
                             v-tooltip="'Restore'"
                           >
@@ -340,33 +374,19 @@ export default {
         { value: 'archived', label: 'Archived' },
       ],
       campaigns: [],
-      statsCards: [
-        {
-          title: "Today's Calls",
-          value: '247',
-          iconClass: 'phone-icon text-blue-600',
-        },
-        {
-          title: 'Lead Conversion Rate',
-          value: '18.5%',
-          iconClass: 'user-check-icon text-green-600',
-        },
-        {
-          title: 'Scheduled Appointments',
-          value: '12',
-          iconClass: 'calendar-icon text-purple-600',
-        },
-      ],
+      statsCards: [],
     }
   },
   mounted() {
     this.getCampaigns()
+    this.getCampaignsStats()
   },
   methods: {
-    async getCampaigns() {
+    async getCampaigns(isArchived = false) {
       this.loaderStore.setIsLoading(true)
       try {
-        const { data } = await ApiRequest().get(`/api/v1/compaigns/list`)
+        let queries = isArchived ? true : false
+        const { data } = await ApiRequest().get(`/api/v1/compaigns/list?archived=${queries}`)
         this.campaigns = data
       } catch (e) {
         this.toastStore.show(e, 'error')
@@ -379,12 +399,36 @@ export default {
       return moment(value).format('MM/DD/YYYY HH:mm')
     },
     toggleFilters() {},
-    async deleteCampaign(uid) {
+    async deleteCampaign(uid, isArchived) {
       this.loaderStore.setIsLoading(true)
       try {
         const { data } = await ApiRequest().delete(`/api/v1/compaigns/delete/${uid}`)
         this.toastStore.show('Campaign deleted successfully!', 'success')
+        this.getCampaigns(isArchived)
+      } catch (e) {
+        this.toastStore.show(e, 'error')
+      } finally {
+        this.loaderStore.setIsLoading(false)
+      }
+    },
+    async archiveCampaign(uid) {
+      this.loaderStore.setIsLoading(true)
+      try {
+        const { data } = await ApiRequest().get(`/api/v1/compaigns/archive/${uid}`)
+        this.toastStore.show('Campaign archived successfully!', 'success')
         this.getCampaigns()
+      } catch (e) {
+        this.toastStore.show(e, 'error')
+      } finally {
+        this.loaderStore.setIsLoading(false)
+      }
+    },
+    async restoreCampaign(uid) {
+      this.loaderStore.setIsLoading(true)
+      try {
+        const { data } = await ApiRequest().get(`/api/v1/compaigns/restore/${uid}`)
+        this.toastStore.show('Campaign restored successfully!', 'success')
+        this.getCampaigns(true)
       } catch (e) {
         this.toastStore.show(e, 'error')
       } finally {
@@ -393,6 +437,26 @@ export default {
     },
     viewCampaign(uid) {
       this.$router.push({ name: 'campaign-details', params: { uid: uid } })
+    },
+    async getCampaignsStats() {
+      this.loaderStore.setIsLoading(true)
+      try {
+        const { data } = await ApiRequest().get(`/api/v1/compaigns/info`)
+        this.statsCards = data
+      } catch (e) {
+        this.toastStore.show(e, 'error')
+      } finally {
+        this.loaderStore.setIsLoading(false)
+      }
+    },
+  },
+  watch: {
+    currentTab(val) {
+      if (val === 'active') {
+        this.getCampaigns()
+      } else {
+        this.getCampaigns(true)
+      }
     },
   },
 }
