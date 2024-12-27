@@ -3,7 +3,7 @@
   <Loader />
   <main class="min-h-screen bg-[#F8F7FA] bg-opacity-80">
     <aside
-      v-if="isSignedIn && $route.name !== 'signup'"
+      v-if="(isSignedIn && $route.name !== 'signup') && !$route.meta.isHideSidebar"
       class="fixed top-0 left-0 z-[9998] h-full w-[260px] bg-white-100 border-r border-border-100 transition-all duration-100"
       :class="[isCollapsed ? 'xl:left-0' : 'xl:-left-[260px]']"
     >
@@ -88,7 +88,7 @@
         </div>
       </div>
     </aside>
-    <div :class="!isSignedIn ? 'ml-0' : 'ml-[260px]'">
+    <div :class="!isSignedIn || $route.meta.isHideSidebar ? 'ml-0' : 'ml-[260px]'">
       <RouterView :key="$route.path" />
     </div>
   </main>

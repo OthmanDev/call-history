@@ -260,11 +260,6 @@ export default {
         { value: 'active', label: 'Active' },
         { value: 'archived', label: 'Archived' },
       ],
-      tableHeaders: [
-        { key: 'name', label: 'Name' },
-        { key: 'date', label: 'Date Sent' },
-        { key: 'recipients', label: 'Recipients' },
-      ],
       campaigns: [],
       statsCards: [
         {

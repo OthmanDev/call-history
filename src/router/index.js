@@ -77,6 +77,14 @@ const router = createRouter({
         requireAuth: true,
       },
     },
+    {
+      path: "/:pathMatch(.*)*",
+      name: "error-view",
+      component: () => import("@/views/ErrorView.vue"),
+      meta: {
+        isHideSidebar: true,
+      },
+    },
   ],
 })
 router.beforeEach(async (to) => {
