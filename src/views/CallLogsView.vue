@@ -783,6 +783,7 @@ export default {
       }
     },
     filterCallsLogs() {
+      this.currentPage = 0
       this.loadCallLogs()
     },
     clearCallsLogsFilter(type) {
@@ -910,6 +911,7 @@ export default {
       this.selectedPayment = ''
       this.selectedDebt = ''
       this.moreFilters = false
+      this.currentPage = 0
       this.loadCallLogs()
     },
     async updateNotesOrStage(type, id, value) {
