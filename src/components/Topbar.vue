@@ -5,7 +5,12 @@
         <span class="cursor-pointer text-heading-100 xl:flex hidden" @click="collapseSidebar">
           <menu-right-icon class="w-[23px] h-[23px]" />
         </span>
-        <h1 class="text-xl font-bold text-heading-100 leading-none mt-[2.5px]">{{ title }}</h1>
+        <h1 class="text-xl font-bold text-heading-100 leading-none">{{ title }}</h1>
+        <span
+          v-if="currentWorkspace"
+          class="inline-flex items-center text-center h-8 px-2 text-[15px] rounded-md bg-opacity-10 capitalize bg-primary-100 text-primary-100"
+          >current workspace: {{ currentWorkspace.name }}</span
+        >
         <slot></slot>
       </div>
       <div class="flex items-center gap-2">
@@ -180,6 +185,11 @@ export default {
       } finally {
         this.loaderStore.setIsLoading(false)
       }
+    },
+  },
+  computed: {
+    currentWorkspace() {
+      return this.workspacesStore.workspaces.find((workspace) => workspace.default)
     },
   },
 }
