@@ -75,19 +75,23 @@
               </div>
               <div class="border border-border-100 rounded-xl bg-white-100 p-4">
                 <div class="text-2xl font-bold text-heading-100 mb-1 uppercase">
-                  {{ statsCards['answerRate'] }}%
+                  {{ statsCards['answerRate'] !== 'NaN' ? statsCards['answerRate'] : 0 }}%
                 </div>
                 <div class="text-[17px] capitalize">Call Answer Rate</div>
               </div>
               <div class="border border-border-100 rounded-xl bg-white-100 p-4">
                 <div class="text-2xl font-bold text-heading-100 mb-1 uppercase">
-                  {{ statsCards['followupConversion'] }}%
+                  {{
+                    statsCards['followupConversion'] !== 'NaN'
+                      ? statsCards['followupConversion']
+                      : 0
+                  }}%
                 </div>
                 <div class="text-[17px] capitalize">Follow-Up Conversion</div>
               </div>
               <div class="border border-border-100 rounded-xl bg-white-100 p-4">
                 <div class="text-2xl font-bold text-heading-100 mb-1 uppercase">
-                  {{ statsCards['complianceRate'] }}%
+                  {{ statsCards['complianceRate'] !== 'NaN' ? statsCards['complianceRate'] : 0 }}%
                 </div>
                 <div class="text-[17px] capitalize">Compliance Rate</div>
               </div>

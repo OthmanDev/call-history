@@ -43,11 +43,15 @@
                 v-if="workspacesStore.workspaces.length > 0"
                 class="border-t border-border-100"
               ></div>
-              <div v-if="workspacesStore.workspaces.length > 0" class="grid gap-3 max-h-[100px] overflow-y-auto without-scrollbar">
+              <div
+                v-if="workspacesStore.workspaces.length > 0"
+                class="grid gap-3 max-h-[100px] overflow-y-auto without-scrollbar"
+              >
                 <div
                   v-for="workspace in workspacesStore.workspaces"
                   :key="workspace.id"
-                  class="cursor-pointer"
+                  :class="workspace.default ? '' : 'cursor-pointer'"
+                  @click="setWorkspaceAsDefault(workspace.uid)"
                 >
                   <div class="flex flex-col w-full">
                     <div class="flex justify-between items-center">
@@ -106,13 +110,18 @@
 import { UserCircle, LogOut, Users, Building, Plus, Network, X } from 'lucide-vue-next'
 import { useUserStore } from '@/stores/user'
 import { useWorkspacesStore } from '@/stores/workspaces'
+import { useLoaderStore } from '@/stores/loader'
+import { useToastStore } from '@/stores/toast'
 import { SignOutButton } from '@clerk/vue'
 import CreateWorkspace from '@/components/CreateWorkspace.vue'
+import ApiRequest from '@/libs/ApiRequest'
 export default {
   setup() {
     const userStore = useUserStore()
     const workspacesStore = useWorkspacesStore()
-    return { userStore, workspacesStore }
+    const loaderStore = useLoaderStore()
+    const toastStore = useToastStore()
+    return { userStore, workspacesStore, loaderStore, toastStore }
   },
   props: {
     title: {
@@ -159,6 +168,18 @@ export default {
     },
     closeAddWorkspace() {
       this.isAddOpen = false
+    },
+    async setWorkspaceAsDefault(uid) {
+      this.loaderStore.setIsLoading(true)
+      try {
+        const { data } = await ApiRequest().get(`/api/v1/workspaces/default/${uid}`)
+        this.toastStore.show('Workspace seted as default successfully', 'success')
+        window.location.reload()
+      } catch (e) {
+        this.toastStore.show(e, 'error')
+      } finally {
+        this.loaderStore.setIsLoading(false)
+      }
     },
   },
 }
